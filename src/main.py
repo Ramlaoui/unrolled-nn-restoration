@@ -16,6 +16,8 @@ if __name__ == "__main__":
     parser.add_argument("--generate", action="store_true")
     parser.add_argument("--n_epochs", type=int, default=3)
     parser.add_argument("--batch_size", type=int, default=4)
+    parser.add_argument("--n_layers", type=int, default=2)
+    parser.add_argument("--device", type=str, default="cpu")
     args = parser.parse_args()
 
     if args.generate:
