@@ -1,7 +1,0 @@
-  0%|                                                                                 | 0/20 [00:00<?, ?it/s]
-Traceback (most recent call last):
-  File "/Users/aliramlaoui/Library/CloudStorage/GoogleDrive-ramlaouiali@gmail.com/My Drive/Cours 3A/AST/project/unrolled-nn-restoration/src/main.py", line 84, in <module>
-    trainer.train(z, x, args.n_epochs, args.batch_size, validation_data=validation_data)
-  File "/Users/aliramlaoui/Library/CloudStorage/GoogleDrive-ramlaouiali@gmail.com/My Drive/Cours 3A/AST/project/unrolled-nn-restoration/src/train.py", line 34, in train
-    for i in range(0, z.shape[0], batch_size):
-TypeError: 'NoneType' object cannot be interpreted as an integer
