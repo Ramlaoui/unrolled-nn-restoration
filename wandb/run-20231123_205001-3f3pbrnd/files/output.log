@@ -1,0 +1,21 @@
+
+  0%|                                                                                 | 0/20 [00:00<?, ?it/s]
+Epoch 0 loss: 29.72091886138916
+Calculating validation loss...
+  0%|                                                                                 | 0/20 [00:00<?, ?it/s]/Users/aliramlaoui/Library/CloudStorage/GoogleDrive-ramlaouiali@gmail.com/My Drive/Cours 3A/AST/project/unrolled-nn-restoration/venv/lib/python3.10/site-packages/plotly/matplotlylib/renderer.py:609: UserWarning:
+I found a path object that I don't think is part of a bar chart. Ignoring.
+  5%|███▋                                                                     | 1/20 [00:01<00:35,  1.85s/it]/Users/aliramlaoui/Library/CloudStorage/GoogleDrive-ramlaouiali@gmail.com/My Drive/Cours 3A/AST/project/unrolled-nn-restoration/src/train.py:55: UserWarning:
+To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+/Users/aliramlaoui/Library/CloudStorage/GoogleDrive-ramlaouiali@gmail.com/My Drive/Cours 3A/AST/project/unrolled-nn-restoration/src/train.py:56: UserWarning:
+To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+ 10%|███████▎                                                                 | 2/20 [00:03<00:28,  1.59s/it]
+Epoch 1 loss: 19.750741359710695
+Calculating validation loss...
+Validation loss: 16.38990592956543
+Epoch 2 loss: 14.155398643493653
+Calculating validation loss...
+
+ 15%|██████████▉                                                              | 3/20 [00:04<00:26,  1.54s/it]
+Epoch 3 loss: 10.841200605392457
+Calculating validation loss...
+

@@ -4,40 +4,75 @@ import argparse
 import torch
 from torch import nn
 from tqdm import tqdm
+import yaml
 
 from models import PrimalDual
 from train import PrimalDualTrainer
 
 
+def generate_sparse_data(N, n_signal, max_peaks, window_length=5):
+    assert window_length * 2 + 1 < n_signal
+    n_peaks = np.random.randint(5, max_peaks, N)
+    peaks_positions = np.random.randint(
+        window_length + 1, n_signal - window_length - 1, (N, max(n_peaks))
+    )
+    x = np.zeros((N, n_signal))
+    peak_signal = np.random.uniform(0.5, 20, (N, max(n_peaks)))
+    for i in range(N):
+        for j in range(n_peaks[i]):
+            x[
+                i,
+                peaks_positions[i, j]
+                - window_length : peaks_positions[i, j]
+                + window_length
+                + 1,
+            ] += np.abs(
+                np.sort(np.random.normal(0, 0.1, 2 * window_length + 1))
+                * peak_signal[i, j]
+            )
+    noise = np.random.normal(0, 0.1, (N, n_signal))
+    z = x + noise
+    x = x.reshape(N, -1, 1).astype(np.float32)
+    z = z.reshape(N, -1, 1).astype(np.float32)
+    return z, x
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("--config", type=str, default="configs/default.yaml")
     parser.add_argument("--input", type=str, default="data/data1.npz")
     parser.add_argument("--output", type=str, default="data/data1.npz")
+    parser.add_argument("--validation_data", type=str, default="data/data_val.npz")
     parser.add_argument("--generate", action="store_true")
-    parser.add_argument("--n_epochs", type=int, default=3)
-    parser.add_argument("--batch_size", type=int, default=4)
-    parser.add_argument("--n_layers", type=int, default=2)
+    parser.add_argument("--is_debug", action="store_true")
     parser.add_argument("--device", type=str, default="cpu")
+
+    # For these arguments only use them if they are inputted:
+    parser.add_argument("--n_epochs", type=int)
+    parser.add_argument("--batch_size", type=int)
+    parser.add_argument("--n_layers", type=int)
+    parser.add_argument("--lr", type=float)
+
     args = parser.parse_args()
+    config = yaml.load(open(args.config, "r"), Loader=yaml.FullLoader)
 
     if args.generate:
         # Generate a dataset
         n_signal = 1000
-        N = 200
-        n_peaks = np.random.randint(5, 100, N)
-        peaks_positions = np.random.randint(0, n_signal, (N, max(n_peaks)))
-        x = np.zeros((N, n_signal))
-        x[np.arange(N).reshape(-1, 1), peaks_positions] = 1
-        noise = np.random.normal(0, 0.1, (N, n_signal))
-        z = x + noise
-        x = x.reshape(N, -1, 1).astype(np.float32)
-        z = z.reshape(N, -1, 1).astype(np.float32)
-
+        N = 1000
+        max_peaks = 90
+        x, z = generate_sparse_data(N, n_signal, max_peaks)
         np.savez(args.output, x=x, z=z)
 
-        plt.plot(x[0])
-        plt.plot(x[1])
-        plt.show()
+        # Generate a validation dataset
+        N_val = 100
+        x_val, z_val = generate_sparse_data(N_val, n_signal, max_peaks)
+        np.savez(args.validation_data, x=x_val, z=z_val)
+        # plt.plot(x[0], label="Noisy signal")
+        # plt.plot(z[0], label="Original signal")
+        # plt.legend()
+        # plt.show()
+
     else:
         data = np.load(args.input)
         x = data["x"].astype(np.float32)
@@ -45,9 +80,23 @@ if __name__ == "__main__":
         n_signal = x.shape[1]
         N = x.shape[0]
 
+    # Fill the config object with the args
+    for arg in vars(args):
+        if arg in config and (getattr(args, arg) is not None):
+            config[arg] = getattr(args, arg)
+
     model = PrimalDual(n_signal, n_signal, 2)
     criterion = nn.MSELoss()
-    optimizer = torch.optim.Adam(model.parameters())
-    trainer = PrimalDualTrainer(model, criterion, optimizer)
+    optimizer = torch.optim.Adam(
+        model.parameters(), lr=config["lr"], weight_decay=config["weight_decay"]
+    )
+    trainer = PrimalDualTrainer(
+        model, config, criterion, optimizer, debug=args.is_debug
+    )
 
-    trainer.train(z, x, args.n_epochs, args.batch_size)
+    if args.validation_data is not None:
+        validation_data = np.load(args.validation_data)
+
+    trainer.train(
+        z, x, config["n_epochs"], config["batch_size"], validation_data=validation_data
+    )

@@ -1,0 +1,195 @@
+
+  0%|                                                                                 | 0/50 [00:00<?, ?it/s]
+Epoch 0 loss: 35.90761426544189
+Calculating validation loss...
+  0%|                                                                                 | 0/50 [00:00<?, ?it/s]/Users/aliramlaoui/Library/CloudStorage/GoogleDrive-ramlaouiali@gmail.com/My Drive/Cours 3A/AST/project/unrolled-nn-restoration/venv/lib/python3.10/site-packages/plotly/matplotlylib/renderer.py:609: UserWarning:
+I found a path object that I don't think is part of a bar chart. Ignoring.
+  2%|█▍                                                                       | 1/50 [00:02<01:57,  2.40s/it]/Users/aliramlaoui/Library/CloudStorage/GoogleDrive-ramlaouiali@gmail.com/My Drive/Cours 3A/AST/project/unrolled-nn-restoration/src/train.py:54: UserWarning:
+To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+/Users/aliramlaoui/Library/CloudStorage/GoogleDrive-ramlaouiali@gmail.com/My Drive/Cours 3A/AST/project/unrolled-nn-restoration/src/train.py:55: UserWarning:
+To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+Epoch 1 loss: 26.73966089630127
+Calculating validation loss...
+Validation loss: 22.487110137939453
+  6%|████▍                                                                    | 3/50 [00:05<01:20,  1.72s/it]
+Epoch 2 loss: 19.935171440124513
+Calculating validation loss...
+Validation loss: 17.003780364990234
+Epoch 3 loss: 14.990326816558838
+Calculating validation loss...
+
+  8%|█████▊                                                                   | 4/50 [00:06<01:14,  1.62s/it]
+Epoch 4 loss: 11.365932277679443
+Calculating validation loss...
+
+ 10%|███████▎                                                                 | 5/50 [00:08<01:11,  1.60s/it]
+Epoch 5 loss: 8.551524730682374
+Calculating validation loss...
+
+ 14%|██████████▏                                                              | 7/50 [00:11<01:11,  1.66s/it]
+Epoch 6 loss: 6.4647596778869625
+Calculating validation loss...
+
+ 16%|███████████▋                                                             | 8/50 [00:13<01:11,  1.71s/it]
+Epoch 7 loss: 4.874992246627808
+Calculating validation loss...
+
+ 18%|█████████████▏                                                           | 9/50 [00:15<01:08,  1.66s/it]
+Epoch 8 loss: 3.7744245071411133
+Calculating validation loss...
+Validation loss: 3.229279041290283
+Epoch 9 loss: 2.9476784086227417
+Calculating validation loss...
+
+ 20%|██████████████▍                                                         | 10/50 [00:17<01:08,  1.71s/it]
+Epoch 10 loss: 2.2931515350341796
+Calculating validation loss...
+
+ 22%|███████████████▊                                                        | 11/50 [00:18<01:05,  1.68s/it]
+Epoch 11 loss: 1.7737571897506714
+Calculating validation loss...
+
+ 26%|██████████████████▋                                                     | 13/50 [00:21<00:59,  1.60s/it]
+Epoch 12 loss: 1.4238525953292847
+Calculating validation loss...
+
+ 28%|████████████████████▏                                                   | 14/50 [00:23<00:58,  1.61s/it]
+Epoch 13 loss: 1.109205186367035
+Calculating validation loss...
+Validation loss: 1.002807378768921
+Epoch 14 loss: 0.9200367741584777
+Calculating validation loss...
+
+ 30%|█████████████████████▌                                                  | 15/50 [00:24<00:54,  1.55s/it]
+Epoch 15 loss: 0.7429488143920898
+Calculating validation loss...
+
+ 34%|████████████████████████▍                                               | 17/50 [00:27<00:51,  1.55s/it]
+Epoch 16 loss: 0.6103898013830185
+Calculating validation loss...
+
+ 36%|█████████████████████████▉                                              | 18/50 [00:29<00:50,  1.56s/it]
+Epoch 17 loss: 0.508150830745697
+Calculating validation loss...
+Validation loss: 0.47831887006759644
+Epoch 18 loss: 0.43733934211730957
+
+ 38%|███████████████████████████▎                                            | 19/50 [00:31<00:50,  1.62s/it]
+Validation loss: 0.3577600419521332
+Epoch 19 loss: 0.3587825877070427
+Calculating validation loss...
+
+ 40%|████████████████████████████▊                                           | 20/50 [00:32<00:47,  1.59s/it]
+Epoch 20 loss: 0.31266200000047684
+Calculating validation loss...
+
+ 44%|███████████████████████████████▋                                        | 22/50 [00:35<00:43,  1.54s/it]
+Epoch 21 loss: 0.2734608565568924
+Calculating validation loss...
+Validation loss: 0.24699507653713226
+Epoch 22 loss: 0.24052711832523346
+Calculating validation loss...
+
+ 46%|█████████████████████████████████                                       | 23/50 [00:37<00:41,  1.52s/it]
+Epoch 23 loss: 0.2147910712957382
+Calculating validation loss...
+
+ 48%|██████████████████████████████████▌                                     | 24/50 [00:38<00:39,  1.54s/it]
+Epoch 24 loss: 0.19414414605498315
+Calculating validation loss...
+
+ 52%|█████████████████████████████████████▍                                  | 26/50 [00:41<00:36,  1.53s/it]
+Epoch 25 loss: 0.17741813135147094
+Calculating validation loss...
+Validation loss: 0.16434548795223236
+Epoch 26 loss: 0.17243341892957686
+
+ 54%|██████████████████████████████████████▉                                 | 27/50 [00:43<00:35,  1.53s/it]
+Validation loss: 0.1604883372783661
+Epoch 27 loss: 0.15332861164212228
+Calculating validation loss...
+
+ 56%|████████████████████████████████████████▎                               | 28/50 [00:45<00:34,  1.57s/it]
+Epoch 28 loss: 0.1486238833963871
+Calculating validation loss...
+
+ 58%|█████████████████████████████████████████▊                              | 29/50 [00:46<00:33,  1.60s/it]
+Epoch 29 loss: 0.1396660290956497
+Calculating validation loss...
+
+ 62%|████████████████████████████████████████████▋                           | 31/50 [00:49<00:30,  1.60s/it]
+Epoch 30 loss: 0.13341517895460128
+Calculating validation loss...
+
+ 64%|██████████████████████████████████████████████                          | 32/50 [00:51<00:28,  1.59s/it]
+Epoch 31 loss: 0.12841330477595328
+Calculating validation loss...
+Validation loss: 0.12488507479429245
+Epoch 32 loss: 0.12183971324563027
+Calculating validation loss...
+
+ 66%|███████████████████████████████████████████████▌                        | 33/50 [00:53<00:27,  1.60s/it]
+Epoch 33 loss: 0.11929236409068107
+Calculating validation loss...
+
+ 68%|████████████████████████████████████████████████▉                       | 34/50 [00:54<00:25,  1.59s/it]
+Epoch 34 loss: 0.11604786366224289
+Calculating validation loss...
+
+ 72%|███████████████████████████████████████████████████▊                    | 36/50 [00:57<00:21,  1.57s/it]
+Epoch 35 loss: 0.1160856086909771
+Calculating validation loss...
+Validation loss: 0.11988907307386398
+Epoch 36 loss: 0.11181146091222763
+Calculating validation loss...
+
+ 74%|█████████████████████████████████████████████████████▎                  | 37/50 [00:59<00:20,  1.56s/it]
+Epoch 37 loss: 0.10911839947104454
+Calculating validation loss...
+
+ 76%|██████████████████████████████████████████████████████▋                 | 38/50 [01:00<00:18,  1.56s/it]
+Epoch 38 loss: 0.1090296573638916
+Calculating validation loss...
+
+ 80%|█████████████████████████████████████████████████████████▌              | 40/50 [01:03<00:15,  1.51s/it]
+Epoch 39 loss: 0.1076557460129261
+Calculating validation loss...
+Validation loss: 0.10836710780858994
+Epoch 40 loss: 0.10700570541620255
+Calculating validation loss...
+
+ 82%|███████████████████████████████████████████████████████████             | 41/50 [01:05<00:13,  1.54s/it]
+Epoch 41 loss: 0.10433641982078552
+Calculating validation loss...
+
+ 84%|████████████████████████████████████████████████████████████▍           | 42/50 [01:06<00:12,  1.53s/it]
+Epoch 42 loss: 0.10445977926254273
+Calculating validation loss...
+
+ 88%|███████████████████████████████████████████████████████████████▎        | 44/50 [01:10<00:09,  1.52s/it]
+Epoch 43 loss: 0.10314705789089203
+Calculating validation loss...
+Validation loss: 0.1026238277554512
+Epoch 44 loss: 0.10232049542665482
+
+ 90%|████████████████████████████████████████████████████████████████▊       | 45/50 [01:11<00:07,  1.54s/it]
+Validation loss: 0.10349341481924057
+Epoch 45 loss: 0.10263897857069969
+Calculating validation loss...
+
+ 92%|██████████████████████████████████████████████████████████████████▏     | 46/50 [01:13<00:06,  1.60s/it]
+Epoch 46 loss: 0.10240515297651291
+Calculating validation loss...
+
+ 94%|███████████████████████████████████████████████████████████████████▋    | 47/50 [01:14<00:04,  1.62s/it]
+Epoch 47 loss: 0.10169791451096535
+Calculating validation loss...
+
+ 96%|█████████████████████████████████████████████████████████████████████   | 48/50 [01:16<00:03,  1.64s/it]
+Epoch 48 loss: 0.1005798751115799
+Calculating validation loss...
+
+100%|████████████████████████████████████████████████████████████████████████| 50/50 [01:20<00:00,  1.61s/it]
+Epoch 49 loss: 0.10089805755019188
+Calculating validation loss...
+Validation loss: 0.10011601448059082

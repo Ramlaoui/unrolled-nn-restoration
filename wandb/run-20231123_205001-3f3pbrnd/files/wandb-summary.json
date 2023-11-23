@@ -1,0 +1,1 @@
+{"loss": 6.6817450523376465, "_timestamp": 1700769011.811782, "_runtime": 9.914629936218262, "_step": 1605, "val_loss": 7.6031494140625, "prediction_example": {"_type": "plotly-file", "sha256": "47ccbe3908ca2cfb7620f6213c2be3032c08285c8bd5edf090f8d980bfe0ba74", "size": 96049, "path": "media/plotly/prediction_example_1252_47ccbe3908ca2cfb7620.plotly.json"}}
