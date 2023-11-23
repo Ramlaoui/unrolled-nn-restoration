@@ -56,15 +56,15 @@ class PrimalDualTrainer:
                     x_val = torch.tensor(x_val.reshape(-1, x.shape[1])).to(self.device)
                     x_pred_val = self.model(z_val)
                     val_loss = self.criterion(x_pred_val, x_val)
-                    # Pick random element form batch
-                    p = np.random.randint(x_pred_val.shape[0])
-                    x_pred_plot = x_pred_val.detach().numpy()[p]
-                    x_val_plot = x_val.detach().numpy()[p]
-                    plt.plot(x_pred_plot, label="Restored signal")
-                    plt.plot(x_val_plot, label="Original signal")
-                    plt.legend()
                     if not (self.debug):
                         if epoch % self.plot_every == 0:
+                            # Pick random element form batch
+                            p = np.random.randint(x_pred_val.shape[0])
+                            x_pred_plot = x_pred_val.detach().numpy()[p]
+                            x_val_plot = x_val.detach().numpy()[p]
+                            plt.plot(x_pred_plot, label="Restored signal")
+                            plt.plot(x_val_plot, label="Original signal")
+                            plt.legend()
                             self.logger.log(
                                 {"val_loss": val_loss.item(), "prediction_example": plt}
                             )
