@@ -60,13 +60,13 @@ if __name__ == "__main__":
         # Generate a dataset
         n_signal = 1000
         N = 1000
-        max_peaks = 90
-        x, z = generate_sparse_data(N, n_signal, max_peaks)
+        max_peaks = 20
+        z, x = generate_sparse_data(N, n_signal, max_peaks)
         np.savez(args.output, x=x, z=z)
 
         # Generate a validation dataset
         N_val = 100
-        x_val, z_val = generate_sparse_data(N_val, n_signal, max_peaks)
+        z_val, x_val = generate_sparse_data(N_val, n_signal, max_peaks)
         np.savez(args.validation_data, x=x_val, z=z_val)
         # plt.plot(x[0], label="Noisy signal")
         # plt.plot(z[0], label="Original signal")
