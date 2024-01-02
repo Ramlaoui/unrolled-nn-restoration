@@ -13,12 +13,11 @@ def prox_primal(x, tau):
 
 def prox_dual(y, gamma, z, rho):
     batch_wise_norm = torch.norm(1 / gamma * y - z, dim=1)
-    y[batch_wise_norm <= rho] = 0
-    y[batch_wise_norm > rho] = y[batch_wise_norm > rho] - gamma * (
-        z
-        + rho
-        * (y[batch_wise_norm > rho] - gamma * z)
-        / (torch.norm(y[batch_wise_norm > rho] - gamma * z))
+    in_ball = batch_wise_norm <= rho
+    out_ball = batch_wise_norm > rho
+    y[in_ball] = 0
+    y[out_ball] = y[out_ball] - gamma * (
+        z + rho * (y[out_ball] - gamma * z) / (torch.norm(y[out_ball] - gamma * z))
     )
     return y
 
@@ -41,11 +40,14 @@ class PrimalDualLayer(nn.Module):
         rho = self.relu(self.rho)
         y_tilde = 2 * yk - ykm1
 
-        bpk = -tau * (H.transpose(2, 1) @ y_tilde.reshape(batch_size, -1, 1))
-        bpk = bpk.reshape(x.shape[0], -1)
+        # bpk = -tau*H^T*y_tilde
+        bpk = -tau * (H.transpose(1, 2) @ y_tilde.reshape(batch_size, -1, 1)).reshape(
+            batch_size, -1
+        )
         # x = self.linear_primal(x) + bpk
         x = prox_primal(x + bpk, tau)
 
+        # bdk = gamma*H*x
         bdk = gamma * (H @ x.reshape(batch_size, -1, 1)).reshape(batch_size, -1)
         # y = self.linear_dual(yk) + bdk
         y = prox_dual(yk + bdk, gamma, z, rho)
