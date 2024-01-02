@@ -6,8 +6,8 @@ from torch import nn
 from tqdm import tqdm
 import yaml
 
-from models import PrimalDual
-from train import PrimalDualTrainer, SparseDataset
+from src.models.primal_dual import PrimalDual
+from src.train import PrimalDualTrainer, SparseDataset
 
 
 if __name__ == "__main__":
