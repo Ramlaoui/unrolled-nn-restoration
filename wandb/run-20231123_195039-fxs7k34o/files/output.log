@@ -1,7 +1,0 @@
-  0%|                                                                                 | 0/50 [00:00<?, ?it/s]
-Traceback (most recent call last):
-  File "/Users/aliramlaoui/Library/CloudStorage/GoogleDrive-ramlaouiali@gmail.com/My Drive/Cours 3A/AST/project/unrolled-nn-restoration/src/main.py", line 84, in <module>
-    trainer.train(
-  File "/Users/aliramlaoui/Library/CloudStorage/GoogleDrive-ramlaouiali@gmail.com/My Drive/Cours 3A/AST/project/unrolled-nn-restoration/src/train.py", line 48, in train
-    self.logger.log({"loss": batch_loss.item()})
-AttributeError: 'PrimalDualTrainer' object has no attribute 'logger'
