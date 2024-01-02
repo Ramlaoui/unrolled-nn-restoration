@@ -50,14 +50,16 @@ if __name__ == "__main__":
     n_signal = train_dataset[0][1].shape[0]
     m_signal = train_dataset[0][0].shape[0]
     if args.model_type == "ista":
-        model = ISTA(n_signal, m_signal, 15)
+        model = ISTA(n_signal, m_signal, 15, device=args.device)
     elif args.model_type == "primal_dual":
-        model = PrimalDual(n_signal, m_signal, 15)
+        model = PrimalDual(n_signal, m_signal, 15, device=args.device)
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(
         model.parameters(), lr=config["lr"], weight_decay=config["weight_decay"]
     )
-    trainer = SingleTrainer(model, config, criterion, optimizer, debug=args.is_debug)
+    trainer = SingleTrainer(
+        model, config, criterion, optimizer, debug=args.is_debug, device=args.device
+    )
 
     trainer.train(
         train_loader,

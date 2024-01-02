@@ -1,10 +1,12 @@
 import torch
 
 
-def prox_primal(x, tau):
+def prox_primal(x, tau, device="cpu"):
     return torch.mul(
         torch.sign(x),
-        torch.maximum(torch.abs(x) - tau, torch.zeros_like(x, requires_grad=False)),
+        torch.maximum(
+            torch.abs(x) - tau, torch.zeros_like(x, requires_grad=False, device=device)
+        ),
     )
 
 

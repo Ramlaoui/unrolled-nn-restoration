@@ -60,12 +60,17 @@ class SingleTrainer:
         if not (debug):
             self.logger = wandb
             self.logger.init(project="deep-unrolling", config=config)
-            self.plot_every = 2
+            self.plot_every = 100
 
     def train(self, train_loader, n_epochs, validation_loader=None):
+        if self.model.device != self.device:
+            self.device = self.model.device
         for epoch in tqdm(range(n_epochs)):
             epoch_loss = 0
             for z_batch, x_batch, H_batch in train_loader:
+                z_batch = z_batch.to(self.device)
+                x_batch = x_batch.to(self.device)
+                H_batch = H_batch.to(self.device)
                 self.optimizer.zero_grad()
                 x_pred = self.model(z_batch, H_batch)
                 batch_loss = self.criterion(x_pred, x_batch)
@@ -78,6 +83,9 @@ class SingleTrainer:
             if validation_loader is not None:
                 print("Calculating validation loss...")
                 z_val, x_val, H_val = next(iter(validation_loader))
+                z_val = z_val.to(self.device)
+                x_val = x_val.to(self.device)
+                H_val = H_val.to(self.device)
                 with torch.no_grad():
                     x_pred_val = self.model(z_val, H_val)
                     val_loss = self.criterion(x_pred_val, x_val)
