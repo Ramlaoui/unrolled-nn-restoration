@@ -1,3 +1,4 @@
+model_type: primal_dual
 n_epochs: 10
 batch_size: 4 
 n_layers: 14
