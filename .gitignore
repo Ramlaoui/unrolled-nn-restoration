@@ -1,4 +1,5 @@
 venv/
 .DS_Store
-wandb/
-
+wandb
+data/*
+__pycache__/
