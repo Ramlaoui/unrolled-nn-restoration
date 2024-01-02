@@ -5,10 +5,9 @@ from src.utils import prox_primal
 
 
 class ISTALayer(nn.Module):
-    def __init__(
-        self,
-    ):
+    def __init__(self, n):
         super().__init__()
+        self.n = n
         self.relu = nn.ReLU()
         self.chi = nn.Parameter(torch.FloatTensor([10]), requires_grad=True)
         self.gamma = nn.Parameter(torch.FloatTensor([0.01]), requires_grad=True)
@@ -29,6 +28,7 @@ class ISTALayer(nn.Module):
 class ISTA(nn.Module):
     def __init__(self, n, m, n_layers):
         super().__init__()
+        self.model_name = "ista"
         self.n = n
         self.m = m
         self.layers = nn.ModuleList([ISTALayer(n) for _ in range(n_layers)])

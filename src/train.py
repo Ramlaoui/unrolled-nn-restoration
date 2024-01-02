@@ -33,11 +33,18 @@ class SparseDataset(torch.utils.data.Dataset):
         return z, x, H
 
 
-class PrimalDualTrainer:
+class SingleTrainer:
     def __init__(
-        self, model, config, criterion=None, optimizer=None, device=None, debug=False
+        self,
+        model,
+        config,
+        criterion=None,
+        optimizer=None,
+        device=None,
+        debug=False,
     ):
         self.model = model
+        self.model_name = model.__class__.__name__
         if criterion is None:
             criterion = nn.MSELoss()
         self.criterion = criterion

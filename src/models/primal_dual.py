@@ -41,6 +41,7 @@ class PrimalDualLayer(nn.Module):
 class PrimalDual(nn.Module):
     def __init__(self, n, m, n_layers):
         super().__init__()
+        self.model_name = "primal_dual"
         self.n = n
         self.m = m
         self.layers = nn.ModuleList([PrimalDualLayer(n) for _ in range(n_layers)])
