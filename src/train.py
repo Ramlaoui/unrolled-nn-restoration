@@ -4,6 +4,46 @@ from tqdm import tqdm
 from torch import nn
 import wandb
 import matplotlib.pyplot as plt
+from pathlib import Path
+
+
+class DataLoader(torch.utils.data.Dataset):
+    def __init__(self, config, data_type="training"):
+        super().__init__()
+        self.config = config
+        self.path = Path(config["data_path"]) / data_type
+        self.batch_size = config["batch_size"]
+        self.z_path = self.path / "Degraded"
+        self.x_path = self.path / "Groundtruth"
+        self.H_path = self.path / "H"
+
+        breakpoint()
+        self.z_files = sorted(list(self.z_path.glob("*.npy")))
+        self.x_files = sorted(list(self.x_path.glob("*.npy")))
+        self.H_files = sorted(list(self.H_path.glob("*.npy")))
+
+    def __len__(self):
+        return len(list(self.z_path.glob("*.npy")))
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        z_batch = [np.load(z_file) for z_file in self.z_files[idx]]
+        x_batch = [np.load(x_file) for x_file in self.x_files[idx]]
+        H_batch = [np.load(H_file) for H_file in self.H_files[idx]]
+
+        # Convert lists to tensors
+        z_batch = torch.FloatTensor(z_batch)
+        x_batch = torch.FloatTensor(x_batch)
+        H_batch = torch.FloatTensor(H_batch)
+
+        return z_batch, x_batch, H_batch
+
+    def get_batch(self, batch_num):
+        start_idx = batch_num * self.batch_size
+        end_idx = start_idx + self.batch_size
+        return self.__getitem__(slice(start_idx, end_idx))
 
 
 class PrimalDualTrainer:
@@ -28,7 +68,7 @@ class PrimalDualTrainer:
             self.logger.init(project="deep-unrolling", config=config)
             self.plot_every = 2
 
-    def train(self, z, x, n_epochs, batch_size=1, validation_data=None):
+    def train(self, train_loader, n_epochs, batch_size=1, validation_data=None):
         if validation_data is not None:
             z_val, x_val = validation_data["z"], validation_data["x"]
         for epoch in tqdm(range(n_epochs)):

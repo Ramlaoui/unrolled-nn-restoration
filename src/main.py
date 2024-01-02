@@ -7,7 +7,7 @@ from tqdm import tqdm
 import yaml
 
 from models import PrimalDual
-from train import PrimalDualTrainer
+from train import PrimalDualTrainer, DataLoader
 
 
 def generate_sparse_data(N, n_signal, max_peaks, window_length=5):
@@ -85,6 +85,8 @@ if __name__ == "__main__":
         if arg in config and (getattr(args, arg) is not None):
             config[arg] = getattr(args, arg)
 
+    train_loader = DataLoader(config, data_type="training")
+    breakpoint()
     model = PrimalDual(n_signal, n_signal, 2)
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(
