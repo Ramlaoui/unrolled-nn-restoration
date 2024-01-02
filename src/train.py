@@ -6,6 +6,8 @@ import wandb
 import matplotlib.pyplot as plt
 from pathlib import Path
 
+# TODO: Save the parameters to wandb
+
 
 class SparseDataset(torch.utils.data.Dataset):
     def __init__(self, config, data_type="training"):
@@ -60,7 +62,7 @@ class SingleTrainer:
         if not (debug):
             self.logger = wandb
             self.logger.init(project="deep-unrolling", config=config)
-            self.plot_every = 100
+            self.plot_every = 2
 
     def train(self, train_loader, n_epochs, validation_loader=None):
         if self.model.device != self.device:
@@ -93,10 +95,12 @@ class SingleTrainer:
                         if epoch % self.plot_every == 0:
                             # Pick random element form batch
                             p = np.random.randint(x_pred_val.shape[0])
-                            x_pred_plot = x_pred_val.detach().numpy()[p]
-                            x_val_plot = x_val.detach().numpy()[p]
+                            x_pred_plot = x_pred_val.detach().cpu().numpy()[p]
+                            x_val_plot = x_val.detach().cpu().numpy()[p]
+                            z_batch_plot = z_val.detach().cpu().numpy()[p]
                             plt.plot(x_pred_plot, label="Restored signal")
                             plt.plot(x_val_plot, label="Original signal")
+                            plt.plot(z_batch_plot, label="Degraded signal")
                             plt.legend()
                             self.logger.log(
                                 {"val_loss": val_loss.item(), "prediction_example": plt}
