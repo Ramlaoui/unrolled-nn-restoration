@@ -11,10 +11,11 @@ class ISTALayer(nn.Module):
         self.device = device
         self.relu = nn.ReLU()
         self.chi = nn.Parameter(
-            torch.FloatTensor([4]), requires_grad=True, device=self.device
+            torch.FloatTensor([4]).to(self.device),
+            requires_grad=True,
         )
         self.gamma = nn.Parameter(
-            torch.FloatTensor([0.2]), requires_grad=True, device=self.device
+            torch.FloatTensor([0.2]).to(self.device), requires_grad=True
         )
 
     def forward(self, x, z, H):

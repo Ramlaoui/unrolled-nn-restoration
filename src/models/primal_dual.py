@@ -14,13 +14,14 @@ class PrimalDualLayer(nn.Module):
         # self.linear_dual = nn.Linear(n, n, bias=False)
         self.device = device
         self.tau = nn.Parameter(
-            torch.FloatTensor([10]), requires_grad=True, device=self.device
+            torch.FloatTensor([10]).to(self.device), requires_grad=True
         )
         self.gamma = nn.Parameter(
-            torch.FloatTensor([0.01]), requires_grad=True, device=self.device
+            torch.FloatTensor([0.01]).to(self.device), requires_grad=True
         )
         self.rho = nn.Parameter(
-            torch.FloatTensor([1]), requires_grad=True, device=self.device
+            torch.FloatTensor([1]).to(self.device),
+            requires_grad=True,
         )
 
     def forward(self, x, yk, ykm1, z, H):
