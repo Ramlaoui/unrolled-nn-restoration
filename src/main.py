@@ -7,7 +7,7 @@ from tqdm import tqdm
 import yaml
 
 from models import PrimalDual
-from train import PrimalDualTrainer, DataLoader
+from train import PrimalDualTrainer, SparseDataset
 
 
 def generate_sparse_data(N, n_signal, max_peaks, window_length=5):
@@ -85,9 +85,22 @@ if __name__ == "__main__":
         if arg in config and (getattr(args, arg) is not None):
             config[arg] = getattr(args, arg)
 
-    train_loader = DataLoader(config, data_type="training")
-    breakpoint()
-    model = PrimalDual(n_signal, n_signal, 2)
+    train_dataset = SparseDataset(config, data_type="training")
+    train_loader = torch.utils.data.DataLoader(
+        train_dataset, batch_size=config["batch_size"], shuffle=True
+    )
+
+    config_test = config.copy()
+    config_test["data_path"] = config["data_path"].replace("training", "validation")
+    config_test["batch_size"] = 1
+    validation_dataset = SparseDataset(config_test, data_type="validation")
+    validation_loader = torch.utils.data.DataLoader(
+        validation_dataset, batch_size=config["batch_size"], shuffle=True
+    )
+
+    n_signal = train_dataset[0][1].shape[0]
+    m_signal = train_dataset[0][0].shape[0]
+    model = PrimalDual(n_signal, m_signal, 2)
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(
         model.parameters(), lr=config["lr"], weight_decay=config["weight_decay"]
@@ -100,5 +113,7 @@ if __name__ == "__main__":
         validation_data = np.load(args.validation_data)
 
     trainer.train(
-        z, x, config["n_epochs"], config["batch_size"], validation_data=validation_data
+        train_loader,
+        n_epochs=config["n_epochs"],
+        validation_loader=validation_loader,
     )
