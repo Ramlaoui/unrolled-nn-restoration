@@ -3,3 +3,4 @@ venv/
 wandb
 data/*
 __pycache__/
+.vscode/
