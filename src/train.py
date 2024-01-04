@@ -8,17 +8,21 @@ from pathlib import Path
 
 
 class SparseDataset(torch.utils.data.Dataset):
-    def __init__(self, config, data_type="training"):
+    def __init__(self, config, learn_kernel=True, data_type="training"):
         super().__init__()
         self.config = config
         self.path = Path(config["data_path"]) / data_type
         self.z_path = self.path / "Degraded"
         self.x_path = self.path / "Groundtruth"
-        self.H_path = self.path / "H"
+
+        self.learn_kernel = learn_kernel
+        if not (learn_kernel):
+            self.H_path = self.path / "H"
 
         self.z_files = sorted(list(self.z_path.glob("*.npy")))
         self.x_files = sorted(list(self.x_path.glob("*.npy")))
-        self.H_files = sorted(list(self.H_path.glob("*.npy")))
+        if not (self.learn_kernel):
+            self.H_files = sorted(list(self.H_path.glob("*.npy")))
 
     def __len__(self):
         return len(list(self.z_path.glob("*.npy")))
@@ -26,11 +30,14 @@ class SparseDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         z = np.load(self.z_files[idx])
         x = np.load(self.x_files[idx])
-        H = np.load(self.H_files[idx])
+        if not (self.learn_kernel):
+            H = np.load(self.H_files[idx])
         z = torch.from_numpy(z).float()
         x = torch.from_numpy(x).float()
-        H = torch.from_numpy(H).float()
-        return z, x, H
+        if not (self.learn_kernel):
+            H = torch.from_numpy(H).float()
+            return z, (x, H)
+        return z, x
 
 
 class SingleTrainer:
@@ -62,15 +69,20 @@ class SingleTrainer:
             self.logger.init(project="deep-unrolling", config=config)
             self.plot_every = 2
 
-    def train(self, train_loader, n_epochs, validation_loader=None):
+    def train(self, train_loader, n_epochs, learn_kernel=True, validation_loader=None):
         if self.model.device != self.device:
             self.device = self.model.device
         for epoch in tqdm(range(n_epochs)):
             epoch_loss = 0
-            for z_batch, x_batch, H_batch in train_loader:
+            for z_batch, x_H in train_loader:
                 z_batch = z_batch.to(self.device)
-                x_batch = x_batch.to(self.device)
-                H_batch = H_batch.to(self.device)
+                if not (learn_kernel):
+                    x_batch, H_batch = x_H
+                    x_batch = x_batch.to(self.device)
+                    H_batch = H_batch.to(self.device)
+                else:
+                    x_batch = x_H.to(self.device)
+                    H_batch = None
                 self.optimizer.zero_grad()
                 x_pred = self.model(z_batch, H_batch)
                 batch_loss = self.criterion(x_pred, x_batch)
@@ -89,10 +101,15 @@ class SingleTrainer:
             print(f"Epoch {epoch} loss: {epoch_loss/train_loader.__len__()}")
             if validation_loader is not None:
                 print("Calculating validation loss...")
-                z_val, x_val, H_val = next(iter(validation_loader))
+                z_val, (x_H_val) = next(iter(validation_loader))
                 z_val = z_val.to(self.device)
-                x_val = x_val.to(self.device)
-                H_val = H_val.to(self.device)
+                if not (learn_kernel):
+                    x_val, H_val = x_H_val
+                    x_val = x_val.to(self.device)
+                    H_val = H_val.to(self.device)
+                else:
+                    x_val = x_H_val.to(self.device)
+                    H_val = None
                 with torch.no_grad():
                     x_pred_val = self.model(z_val, H_val)
                     val_loss = self.criterion(x_pred_val, x_val)

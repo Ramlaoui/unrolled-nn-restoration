@@ -26,6 +26,7 @@ if __name__ == "__main__":
     parser.add_argument("--n_layers", type=int)
     parser.add_argument("--lr", type=float)
     parser.add_argument("--data_path", type=str)
+    parser.add_argument("--learn_kernel", action="store_true", default=False)
 
     args = parser.parse_args()
     args.config = Path("configs/").joinpath(args.config + ".yaml")
@@ -49,7 +50,9 @@ if __name__ == "__main__":
         if (arg in config and (getattr(args, arg) is not None)) or (arg not in config):
             config[arg] = getattr(args, arg)
 
-    train_dataset = SparseDataset(config, data_type="training")
+    train_dataset = SparseDataset(
+        config, learn_kernel=config["learn_kernel"], data_type="training"
+    )
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=config["batch_size"], shuffle=True
     )
@@ -57,18 +60,35 @@ if __name__ == "__main__":
     config_test = config.copy()
     config_test["data_path"] = config["data_path"].replace("training", "validation")
     config_test["batch_size"] = 1
-    validation_dataset = SparseDataset(config_test, data_type="validation")
+    validation_dataset = SparseDataset(
+        config_test, learn_kernel=config["learn_kernel"], data_type="validation"
+    )
     validation_loader = torch.utils.data.DataLoader(
         validation_dataset, batch_size=config["batch_size"], shuffle=True
     )
 
-    n_signal = train_dataset[0][1].shape[0]
+    if config["learn_kernel"]:
+        n_signal = train_dataset[0][1].shape[0]
+    else:
+        n_signal = train_dataset[0][1][0].shape[0]
     m_signal = train_dataset[0][0].shape[0]
     device = torch.device(config["device"])
     if args.model_type == "ista":
-        model = ISTA(n_signal, m_signal, config["n_layers"], device=device)
+        model = ISTA(
+            n_signal,
+            m_signal,
+            config["n_layers"],
+            learn_kernel=config["learn_kernel"],
+            device=device,
+        )
     elif args.model_type == "primal_dual":
-        model = PrimalDual(n_signal, m_signal, config["n_layers"], device=device)
+        model = PrimalDual(
+            n_signal,
+            m_signal,
+            config["n_layers"],
+            learn_kernel=config["learn_kernel"],
+            device=device,
+        )
     elif args.model_type == "half_quadratic":
         model = HalfQuadratic(n_signal, m_signal, config["n_layers"], device=device)
     criterion = nn.MSELoss()
@@ -82,5 +102,6 @@ if __name__ == "__main__":
     trainer.train(
         train_loader,
         n_epochs=config["n_epochs"],
+        learn_kernel=config["learn_kernel"],
         validation_loader=validation_loader,
     )
