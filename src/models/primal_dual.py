@@ -4,9 +4,15 @@ import torch
 from torch import nn
 from src.utils import prox_primal, prox_dual
 
+tau = 10
+gamma = 0.01
+rho = 1
+
 
 class PrimalDualLayer(nn.Module):
-    def __init__(self, n, m, device="cpu"):
+    # define global Class variables
+
+    def __init__(self, n, m, init_factor=1, device="cpu"):
         super().__init__()
         self.n = n
         self.m = m
@@ -15,13 +21,13 @@ class PrimalDualLayer(nn.Module):
         # self.linear_dual = nn.Linear(n, n, bias=False)
         self.device = device
         self.tau = nn.Parameter(
-            torch.FloatTensor([10]).to(self.device), requires_grad=True
+            torch.FloatTensor([tau * init_factor]).to(self.device), requires_grad=True
         )
         self.gamma = nn.Parameter(
-            torch.FloatTensor([0.01]).to(self.device), requires_grad=True
+            torch.FloatTensor([gamma * init_factor]).to(self.device), requires_grad=True
         )
         self.rho = nn.Parameter(
-            torch.FloatTensor([1]).to(self.device),
+            torch.FloatTensor([rho * init_factor]).to(self.device),
             requires_grad=True,
         )
 
@@ -31,7 +37,6 @@ class PrimalDualLayer(nn.Module):
         gamma = self.relu(self.gamma)
         rho = self.relu(self.rho)
         y_tilde = 2 * yk - ykm1
-
         # bpk = -tau*H^T*y_tilde
         if type(H) != torch.Tensor:
             # H is a convolutional layer
@@ -67,15 +72,15 @@ class PrimalDualLayer(nn.Module):
             bdk = gamma * (H @ x.reshape(batch_size, -1, 1)).reshape(batch_size, -1)
         # y = self.linear_dual(yk) + bdk
         y = prox_dual(yk + bdk, gamma, z, rho)
-
         return x, y
 
 
 class PrimalDual(nn.Module):
-    def __init__(self, n, m, n_layers, learn_kernel=False, device="cpu"):
+    def __init__(self, n, m, n_layers, learn_kernel=False, init_factor=1, device="cpu"):
         super().__init__()
         self.model_name = "primal_dual"
         self.device = device
+        self.init_factor = init_factor
         self.n = n
         self.m = m
         self.learn_kernel = learn_kernel
@@ -90,7 +95,10 @@ class PrimalDual(nn.Module):
                 1, 1, kernel_size, padding_mode="zeros", bias=False, padding=padding
             )
         self.layers = nn.ModuleList(
-            [PrimalDualLayer(n, m, device=device) for _ in range(n_layers)]
+            [
+                PrimalDualLayer(n, m, device=device, init_factor=init_factor)
+                for _ in range(n_layers)
+            ]
         )
 
     def forward(self, z, H=None):

@@ -25,6 +25,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int)
     parser.add_argument("--n_layers", type=int)
     parser.add_argument("--lr", type=float)
+    parser.add_argument("--init_factor", type=float)
     parser.add_argument("--data_path", type=str)
     parser.add_argument("--learn_kernel", action="store_true", default=False)
 
@@ -80,6 +81,7 @@ if __name__ == "__main__":
             config["n_layers"],
             learn_kernel=config["learn_kernel"],
             device=device,
+            init_factor=config["init_factor"],
         )
     elif args.model_type == "primal_dual":
         model = PrimalDual(
@@ -87,10 +89,17 @@ if __name__ == "__main__":
             m_signal,
             config["n_layers"],
             learn_kernel=config["learn_kernel"],
+            init_factor=config["init_factor"],
             device=device,
         )
     elif args.model_type == "half_quadratic":
-        model = HalfQuadratic(n_signal, m_signal, config["n_layers"], device=device)
+        model = HalfQuadratic(
+            n_signal,
+            m_signal,
+            config["n_layers"],
+            init_factor=config["init_factor"],
+            device=device,
+        )
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(
         model.parameters(), lr=config["lr"], weight_decay=config["weight_decay"]

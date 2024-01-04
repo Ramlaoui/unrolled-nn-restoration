@@ -3,22 +3,39 @@ import torch.nn as nn
 import numpy as np
 from src.utils import prox_primal
 
+chi = 4
+gamma = 0.2
+
 
 class ISTALayer(nn.Module):
-    def __init__(self, n, device="cpu"):
+    # define global Class variables
+
+    def __init__(self, n, init_factor=1, device="cpu"):
+        """
+        Args:
+            n (int): length of the signal
+            init_factor (float, optional): factor to initialize chi and gamma with. Defaults to 1.
+            device (str, optional): device to run the model on. Defaults to "cpu".
+        """
         super().__init__()
         self.n = n
         self.device = device
         self.relu = nn.ReLU()
         self.chi = nn.Parameter(
-            torch.FloatTensor([4]).to(self.device),
+            torch.FloatTensor([chi * init_factor]).to(self.device),
             requires_grad=True,
         )
         self.gamma = nn.Parameter(
-            torch.FloatTensor([0.2]).to(self.device), requires_grad=True
+            torch.FloatTensor([gamma * init_factor]).to(self.device), requires_grad=True
         )
 
     def forward(self, x, z, H):
+        """
+        Args:
+            x (torch.Tensor): input signal
+            z (torch.Tensor): measurement
+            H (torch.Tensor): measurement matrix
+        """
         batch_size = x.shape[0]
 
         chi = self.relu(self.chi)
@@ -52,10 +69,11 @@ class ISTALayer(nn.Module):
 
 
 class ISTA(nn.Module):
-    def __init__(self, n, m, n_layers, learn_kernel=False, device="cpu"):
+    def __init__(self, n, m, n_layers, learn_kernel=False, init_factor=1, device="cpu"):
         super().__init__()
         self.model_name = "ista"
         self.device = device
+        self.init_factor = init_factor
         self.n = n
         self.m = m
         self.learn_kernel = learn_kernel
@@ -70,7 +88,10 @@ class ISTA(nn.Module):
                 1, 1, kernel_size, padding_mode="zeros", bias=False, padding=padding
             )
         self.layers = nn.ModuleList(
-            [ISTALayer(n, device=device) for _ in range(n_layers)]
+            [
+                ISTALayer(n, device=device, init_factor=init_factor)
+                for _ in range(n_layers)
+            ]
         )
 
     def forward(self, z, H=None):

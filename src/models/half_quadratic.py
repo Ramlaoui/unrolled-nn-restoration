@@ -38,15 +38,15 @@ def F_grad(x, H, z, lambd, delta=1e-3):
         @ (H @ x.reshape(batch_size, -1, 1) - z.reshape(batch_size, -1, 1))
     ).reshape(batch_size, -1) + lambd * psi_dot(x, delta)
 
-
+lambda_ = 1
 class HalfQuadraticLayer(nn.Module):
-    def __init__(self, n, device="cpu"):
+    def __init__(self, n, device="cpu", init_factor=1):
         super().__init__()
         self.n = n
         self.device = device
         self.relu = nn.ReLU()
         self.lambd = nn.Parameter(
-            torch.FloatTensor([1]).to(self.device), requires_grad=True
+            torch.FloatTensor([lambda_*init_factor]).to(self.device), requires_grad=True
         )
         self.time_to_invert = 0
 
@@ -66,14 +66,15 @@ class HalfQuadraticLayer(nn.Module):
 
 
 class HalfQuadratic(nn.Module):
-    def __init__(self, n, m, n_layers, device="cpu"):
+    def __init__(self, n, m, n_layers, device="cpu", init_factor=1):
         super().__init__()
         self.model_name = "ista"
+        self.init_factor = init_factor
         self.device = device
         self.n = n
         self.m = m
         self.layers = nn.ModuleList(
-            [HalfQuadraticLayer(n, device=device) for _ in range(n_layers)]
+            [HalfQuadraticLayer(n, device=device, init_factor=init_factor) for _ in range(n_layers)]
         )
 
     def forward(self, z, H):
