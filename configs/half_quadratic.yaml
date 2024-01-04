@@ -2,4 +2,4 @@ model_type: half_quadratic
 n_layers: 8
 lr: 0.01
 weight_decay: 0.0001
-data_path: ./data/test
+data_path: ./data/massbank
