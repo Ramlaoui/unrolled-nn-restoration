@@ -3,5 +3,6 @@ n_epochs: 10
 batch_size: 4 
 n_layers: 14
 lr: 0.0001
+learn_kernel: False
 weight_decay: 0.0001
 data_path: ./data/massbank
