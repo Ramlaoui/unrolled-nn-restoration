@@ -53,6 +53,7 @@ class PrimalDual(nn.Module):
         super().__init__()
         self.model_name = "primal_dual"
         self.device = device
+        self.init_factor = init_factor
         self.n = n
         self.m = m
         self.layers = nn.ModuleList(

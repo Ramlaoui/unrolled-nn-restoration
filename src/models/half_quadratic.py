@@ -69,6 +69,7 @@ class HalfQuadratic(nn.Module):
     def __init__(self, n, m, n_layers, device="cpu", init_factor=1):
         super().__init__()
         self.model_name = "ista"
+        self.init_factor = init_factor
         self.device = device
         self.n = n
         self.m = m

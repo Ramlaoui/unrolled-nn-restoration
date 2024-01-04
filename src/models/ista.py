@@ -53,6 +53,7 @@ class ISTA(nn.Module):
         super().__init__()
         self.model_name = "ista"
         self.device = device
+        self.init_factor = init_factor
         self.n = n
         self.m = m
         self.layers = nn.ModuleList(
