@@ -16,6 +16,9 @@ def prox_dual(y, gamma, z, rho):
     out_ball = batch_wise_norm > rho
     y[in_ball] = 0
     y[out_ball] = y[out_ball] - gamma * (
-        z + rho * (y[out_ball] - gamma * z) / (torch.norm(y[out_ball] - gamma * z))
+        z[out_ball]
+        + rho
+        * (y[out_ball] - gamma * z[out_ball])
+        / (torch.norm(y[out_ball] - gamma * z[out_ball]))
     )
     return y
