@@ -25,7 +25,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int)
     parser.add_argument("--n_layers", type=int)
     parser.add_argument("--lr", type=float)
-    parser.add_argument("--init_factor", type=float)
+    parser.add_argument("--init_factor", type=float, default=1)
     parser.add_argument("--data_path", type=str)
     parser.add_argument("--learn_kernel", action="store_true", default=False)
 

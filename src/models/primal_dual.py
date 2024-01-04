@@ -85,14 +85,32 @@ class PrimalDual(nn.Module):
         self.m = m
         self.learn_kernel = learn_kernel
         # # Learn kernel h and then use it to create H
-        # #initialize to gaussian kernel
         # full padding to make the output bigger than the input
         # m > n
         if learn_kernel:
             kernel_size = (m - n) + 1
             padding = ((m - 1) + kernel_size - n) // 2
             self.h = torch.nn.Conv1d(
-                1, 1, kernel_size, padding_mode="zeros", bias=False, padding=padding
+                1,
+                1,
+                kernel_size,
+                padding_mode="zeros",
+                bias=False,
+                padding=padding,
+            )
+            # Initialize kernel to gaussian
+            self.h.weight.data = (
+                torch.from_numpy(
+                    (1 / 2 * np.pi)
+                    * np.exp(
+                        -np.arange(-(kernel_size - 1) // 2, (kernel_size - 1) // 2 + 1)
+                        ** 2
+                        / 2
+                    )
+                )
+                .reshape(1, 1, -1)
+                .float()
+                .to(self.device)
             )
         self.layers = nn.ModuleList(
             [

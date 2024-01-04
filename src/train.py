@@ -5,7 +5,7 @@ from torch import nn
 import wandb
 import matplotlib.pyplot as plt
 from pathlib import Path
-from utils import snr, mae
+from src.utils import snr, mae
 
 
 class SparseDataset(torch.utils.data.Dataset):

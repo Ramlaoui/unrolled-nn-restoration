@@ -87,6 +87,20 @@ class ISTA(nn.Module):
             self.h = torch.nn.Conv1d(
                 1, 1, kernel_size, padding_mode="zeros", bias=False, padding=padding
             )
+            # Initialize kernel to gaussian
+            self.h.weight.data = (
+                torch.from_numpy(
+                    (1 / 2 * np.pi)
+                    * np.exp(
+                        -np.arange(-(kernel_size - 1) // 2, (kernel_size - 1) // 2 + 1)
+                        ** 2
+                        / 2
+                    )
+                )
+                .reshape(1, 1, -1)
+                .float()
+                .to(self.device)
+            )
         self.layers = nn.ModuleList(
             [
                 ISTALayer(n, device=device, init_factor=init_factor)
