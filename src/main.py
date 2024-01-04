@@ -25,6 +25,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int)
     parser.add_argument("--n_layers", type=int)
     parser.add_argument("--lr", type=float)
+    parser.add_argument("--init_factor", type=float)
     parser.add_argument("--data_path", type=str)
 
     args = parser.parse_args()
@@ -66,11 +67,11 @@ if __name__ == "__main__":
     m_signal = train_dataset[0][0].shape[0]
     device = torch.device(config["device"])
     if args.model_type == "ista":
-        model = ISTA(n_signal, m_signal, config["n_layers"], device=device)
+        model = ISTA(n_signal, m_signal, config["n_layers"], device=device, init_factor=config["init_factor"])
     elif args.model_type == "primal_dual":
-        model = PrimalDual(n_signal, m_signal, config["n_layers"], device=device)
+        model = PrimalDual(n_signal, m_signal, config["n_layers"], device=device, init_factor=config["init_factor"])
     elif args.model_type == "half_quadratic":
-        model = HalfQuadratic(n_signal, m_signal, config["n_layers"], device=device)
+        model = HalfQuadratic(n_signal, m_signal, config["n_layers"], device=device, init_factor=config["init_factor"])
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(
         model.parameters(), lr=config["lr"], weight_decay=config["weight_decay"]
