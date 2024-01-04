@@ -5,6 +5,7 @@ from torch import nn
 import wandb
 import matplotlib.pyplot as plt
 from pathlib import Path
+from utils import snr, mae
 
 
 class SparseDataset(torch.utils.data.Dataset):
@@ -55,11 +56,6 @@ class SingleTrainer:
         if criterion is None:
             criterion = nn.MSELoss()
         self.criterion = criterion
-        # Signa to noise ratio
-        self.snr = lambda x, x_pred: 10 * torch.log10(
-            torch.sum(x ** 2) / torch.sum((x - x_pred) ** 2)
-        )
-        self.mae = lambda x, x_pred: torch.mean(torch.abs(x - x_pred))
         if optimizer is None:
             optimizer = torch.optim.Adam(
                 self.model.parameters(), lr=config["learning_rate"], weight_decay=1e-5
@@ -91,8 +87,8 @@ class SingleTrainer:
                 self.optimizer.zero_grad()
                 x_pred = self.model(z_batch, H_batch)
                 batch_loss = self.criterion(x_pred, x_batch)
-                barch_snr = self.snr(x_batch, x_pred)
-                batch_mae = self.mae(x_batch, x_pred)
+                barch_snr = snr(x_batch, x_pred)
+                batch_mae = mae(x_batch, x_pred)
                 batch_loss.backward()
                 self.optimizer.step()
                 if not (self.debug):

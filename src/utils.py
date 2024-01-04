@@ -22,3 +22,11 @@ def prox_dual(y, gamma, z, rho):
         / (torch.norm(y[out_ball] - gamma * z[out_ball]))
     )
     return y
+
+
+def snr(x, x_pred):
+    return 10 * torch.log10(torch.sum(x**2) / torch.sum((x - x_pred) ** 2))
+
+
+def mae(x, x_pred):
+    return torch.mean(torch.abs(x - x_pred))
