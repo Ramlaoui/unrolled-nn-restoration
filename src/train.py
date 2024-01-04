@@ -6,8 +6,6 @@ import wandb
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-# TODO: Save the parameters to wandb
-
 
 class SparseDataset(torch.utils.data.Dataset):
     def __init__(self, config, data_type="training"):
@@ -80,6 +78,13 @@ class SingleTrainer:
                 self.optimizer.step()
                 if not (self.debug):
                     self.logger.log({"loss": batch_loss.item()})
+                    # Log all the weights
+                    self.logger.log(
+                        {
+                            f"{name}": param.detach().cpu().numpy()
+                            for name, param in self.model.named_parameters()
+                        }
+                    )
                 epoch_loss += batch_loss.item()
             print(f"Epoch {epoch} loss: {epoch_loss/train_loader.__len__()}")
             if validation_loader is not None:
