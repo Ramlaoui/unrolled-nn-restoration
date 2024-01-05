@@ -56,8 +56,9 @@ class SingleTrainer:
     ):
         self.model = model
         self.model_name = model.__class__.__name__
-        self.model_path = model_path
+        self.model_path = Path(model_path)
         self.learn_kernel = learn_kernel
+        self.run_name = run_name
         if criterion is None:
             criterion = nn.MSELoss()
         self.criterion = criterion
@@ -118,6 +119,7 @@ class SingleTrainer:
             print(f"Epoch {epoch} loss: {epoch_loss/train_loader.__len__()}")
             if validation_loader is not None:
                 print("Calculating validation loss...")
+                best_val_loss = np.inf
                 z_val, (x_H_val) = next(iter(validation_loader))
                 z_val = z_val.to(self.device)
                 if not (self.learn_kernel):
@@ -139,17 +141,40 @@ class SingleTrainer:
                             z_batch_plot = z_val.detach().cpu().numpy()[p]
                             plt.plot(x_pred_plot, label="Restored signal")
                             plt.plot(x_val_plot, label="Original signal")
-                            plt.plot(z_batch_plot, label="Degraded signal")
+                            plt.plot(
+                                z_batch_plot,
+                                label="Degraded signal"
+                                + str(validation_loader.dataset.z_files[p]),
+                            )
                             plt.legend()
                             self.logger.log(
                                 {"val_loss": val_loss.item(), "prediction_example": plt}
                             )
                     print(f"Validation loss: {val_loss.item()}")
-                if save_best_model:
+                if save_best_model and val_loss.item() < best_val_loss:
+                    best_val_loss = val_loss.item()
                     if not (self.debug):
-                        self.logger.save(
-                            f"{self.model_path}/{self.model_name}_best.pth",
+                        torch.save(
+                            self.model.state_dict(),
+                            self.model_path
+                            / f"{self.model_name}_best_{self.run_name}.pt",
                         )
+        print("Training finished, keeping best model...")
+        if not (self.debug):
+            self.model.load_state_dict(
+                torch.load(
+                    self.model_path / f"{self.model_name}_best_{self.run_name}.pt",
+                    map_location=self.device,
+                )
+            )
+
+    def load_model(self):
+        self.model.load_state_dict(
+            torch.load(
+                self.model_path / f"{self.model_name}_best_{self.run_name}.pt",
+                map_location=self.device,
+            )
+        )
 
     def test(self, test_loader, name=""):
         if self.model.device != self.device:
