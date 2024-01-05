@@ -25,6 +25,7 @@ if __name__ == "__main__":
     parser.add_argument("--lr", type=float)
     parser.add_argument("--data_path", type=str)
     parser.add_argument("--learn_kernel", type=bool)
+    parser.add_argument("--test", action="store_true")
 
     args = parser.parse_args()
     args.config = Path("configs/").joinpath(args.config + ".yaml")
@@ -65,7 +66,7 @@ if __name__ == "__main__":
     config_val["data_path"] = config["data_path"].replace("training", "validation")
     config_val["batch_size"] = len(validation_dataset)
     validation_loader = torch.utils.data.DataLoader(
-        validation_dataset, batch_size=config["batch_size"], shuffle=True
+        validation_dataset, batch_size=config["batch_size"], shuffle=False
     )
 
     if config["learn_kernel"]:
@@ -75,6 +76,8 @@ if __name__ == "__main__":
     m_signal = train_dataset[0][0].shape[0]
     device = torch.device(config["device"])
 
+    init_kernel = config["init_kernel"] if "init_kernel" in config else "gaussian"
+
     if args.model_type == "ista":
         model = ISTA(
             n_signal,
@@ -83,6 +86,7 @@ if __name__ == "__main__":
             learn_kernel=config["learn_kernel"],
             device=device,
             init_factor=config["init_factor"],
+            init_kernel=init_kernel,
         )
     elif args.model_type == "primal_dual":
         model = PrimalDual(
@@ -92,6 +96,7 @@ if __name__ == "__main__":
             learn_kernel=config["learn_kernel"],
             init_factor=config["init_factor"],
             device=device,
+            init_kernel=init_kernel,
         )
 
     model.to(device)
@@ -113,12 +118,15 @@ if __name__ == "__main__":
         device=device,
     )
 
-    trainer.train(
-        train_loader,
-        n_epochs=config["n_epochs"],
-        validation_loader=validation_loader,
-        save_best_model=True,
-    )
+    if not (args.test):
+        trainer.train(
+            train_loader,
+            n_epochs=config["n_epochs"],
+            validation_loader=validation_loader,
+            save_best_model=True,
+        )
+    else:
+        trainer.load_model()
 
     config_test = config.copy()
     config_test["batch_size"] = len(validation_dataset)
@@ -130,7 +138,7 @@ if __name__ == "__main__":
                 config_test, learn_kernel=config["learn_kernel"], data_type="test"
             )
             test_loader = torch.utils.data.DataLoader(
-                validation_dataset, batch_size=config_test["batch_size"], shuffle=True
+                test_dataset, batch_size=config_test["batch_size"], shuffle=True
             )
 
             trainer.test(test_loader, name=f"_{key}")
