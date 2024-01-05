@@ -48,11 +48,14 @@ class SingleTrainer:
         config,
         criterion=None,
         optimizer=None,
+        model_path="models/",
+        run_name=None,
         device=None,
         debug=False,
     ):
         self.model = model
         self.model_name = model.__class__.__name__
+        self.model_path = model_path
         if criterion is None:
             criterion = nn.MSELoss()
         self.criterion = criterion
@@ -67,10 +70,17 @@ class SingleTrainer:
         self.debug = debug
         if not (debug):
             self.logger = wandb
-            self.logger.init(project="deep-unrolling", config=config)
+            self.logger.init(project="deep-unrolling", config=config, name=run_name)
             self.plot_every = 2
 
-    def train(self, train_loader, n_epochs, learn_kernel=True, validation_loader=None):
+    def train(
+        self,
+        train_loader,
+        n_epochs,
+        learn_kernel=True,
+        validation_loader=None,
+        save_best_model=False,
+    ):
         if self.model.device != self.device:
             self.device = self.model.device
         for epoch in tqdm(range(n_epochs)):
@@ -134,3 +144,32 @@ class SingleTrainer:
                                 {"val_loss": val_loss.item(), "prediction_example": plt}
                             )
                     print(f"Validation loss: {val_loss.item()}")
+                if save_best_model:
+                    if not (self.debug):
+                        self.logger.save(
+                            f"{self.model_path}/{self.model_name}_best_checkpoint_{self.logger.run.name}.pt"
+                        )
+
+    def test(self, test_loader, name=""):
+        if self.model.device != self.device:
+            self.device = self.model.device
+        test_loss = 0
+        for z_batch, x_H in test_loader:
+            z_batch = z_batch.to(self.device)
+            x_batch, H_batch = x_H
+            x_batch = x_batch.to(self.device)
+            H_batch = H_batch.to(self.device)
+            with torch.no_grad():
+                x_pred = self.model(z_batch, H_batch)
+                batch_loss = self.criterion(x_pred, x_batch)
+                test_loss += batch_loss.item()
+                test_snr = snr(x_batch, x_pred)
+                test_mae = mae(x_batch, x_pred)
+        print(name)
+        print(f"Test loss: {test_loss/test_loader.__len__()}")
+        print(f"Test SNR: {test_snr.item()}")
+        print(f"Test MAE: {test_mae.item()}")
+        if not (self.debug):
+            self.logger.log({f"test_loss{name}": test_loss / test_loader.__len__()})
+            self.logger.log({f"test_snr{name}": test_snr.item()})
+            self.logger.log({f"test_mae{name}": test_mae.item()})
