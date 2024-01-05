@@ -46,6 +46,7 @@ class SingleTrainer:
         self,
         model,
         config,
+        learn_kernel=False,
         criterion=None,
         optimizer=None,
         model_path="models/",
@@ -56,6 +57,7 @@ class SingleTrainer:
         self.model = model
         self.model_name = model.__class__.__name__
         self.model_path = model_path
+        self.learn_kernel = learn_kernel
         if criterion is None:
             criterion = nn.MSELoss()
         self.criterion = criterion
@@ -77,7 +79,6 @@ class SingleTrainer:
         self,
         train_loader,
         n_epochs,
-        learn_kernel=True,
         validation_loader=None,
         save_best_model=False,
     ):
@@ -87,7 +88,7 @@ class SingleTrainer:
             epoch_loss = 0
             for z_batch, x_H in train_loader:
                 z_batch = z_batch.to(self.device)
-                if not (learn_kernel):
+                if not (self.learn_kernel):
                     x_batch, H_batch = x_H
                     x_batch = x_batch.to(self.device)
                     H_batch = H_batch.to(self.device)
@@ -119,7 +120,7 @@ class SingleTrainer:
                 print("Calculating validation loss...")
                 z_val, (x_H_val) = next(iter(validation_loader))
                 z_val = z_val.to(self.device)
-                if not (learn_kernel):
+                if not (self.learn_kernel):
                     x_val, H_val = x_H_val
                     x_val = x_val.to(self.device)
                     H_val = H_val.to(self.device)
@@ -147,7 +148,7 @@ class SingleTrainer:
                 if save_best_model:
                     if not (self.debug):
                         self.logger.save(
-                            f"{self.model_path}/{self.model_name}_best_checkpoint_{self.logger.run.name}.pt"
+                            f"{self.model_path}/{self.model_name}_best.pth",
                         )
 
     def test(self, test_loader, name=""):
@@ -156,9 +157,13 @@ class SingleTrainer:
         test_loss = 0
         for z_batch, x_H in test_loader:
             z_batch = z_batch.to(self.device)
-            x_batch, H_batch = x_H
-            x_batch = x_batch.to(self.device)
-            H_batch = H_batch.to(self.device)
+            if not (self.learn_kernel):
+                x_batch, H_batch = x_H
+                x_batch = x_batch.to(self.device)
+                H_batch = H_batch.to(self.device)
+            else:
+                x_batch = x_H.to(self.device)
+                H_batch = None
             with torch.no_grad():
                 x_pred = self.model(z_batch, H_batch)
                 batch_loss = self.criterion(x_pred, x_batch)

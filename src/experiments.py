@@ -15,7 +15,6 @@ if __name__ == "__main__":
     parser.add_argument("--model_path", type=str, default="models/")
     parser.add_argument("--is_debug", action="store_true")
     parser.add_argument("--device", type=str, default="cpu")
-    parser.add_argument("--learn_kernel", action="store_true", default=False)
     parser.add_argument("--init_factor", type=float, default=1)
 
     # For these arguments only use them if they are inputted:
@@ -25,6 +24,7 @@ if __name__ == "__main__":
     parser.add_argument("--n_layers", type=int)
     parser.add_argument("--lr", type=float)
     parser.add_argument("--data_path", type=str)
+    parser.add_argument("--learn_kernel", type=bool)
 
     args = parser.parse_args()
     args.config = Path("configs/").joinpath(args.config + ".yaml")
@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
     # Fill the config object with the args
     for arg in vars(args):
-        if arg not in config and (getattr(args, arg) is not None):
+        if (arg in config and (getattr(args, arg) is not None)) or (arg not in config):
             config[arg] = getattr(args, arg)
 
     train_dataset = SparseDataset(
@@ -104,8 +104,9 @@ if __name__ == "__main__":
     trainer = SingleTrainer(
         model,
         config,
-        criterion,
-        optimizer,
+        learn_kernel=config["learn_kernel"],
+        criterion=criterion,
+        optimizer=optimizer,
         debug=config["is_debug"],
         model_path=args.model_path,
         run_name=str(args.config).split("/")[-1].split(".")[0],
@@ -115,7 +116,6 @@ if __name__ == "__main__":
     trainer.train(
         train_loader,
         n_epochs=config["n_epochs"],
-        learn_kernel=config["learn_kernel"],
         validation_loader=validation_loader,
         save_best_model=True,
     )

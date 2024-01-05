@@ -27,7 +27,7 @@ if __name__ == "__main__":
     parser.add_argument("--lr", type=float)
     parser.add_argument("--init_factor", type=float, default=1)
     parser.add_argument("--data_path", type=str)
-    parser.add_argument("--learn_kernel", action="store_true", default=False)
+    parser.add_argument("--learn_kernel", type=str)
 
     args = parser.parse_args()
     args.config = Path("configs/").joinpath(args.config + ".yaml")
@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     # Fill the config object with the args
     for arg in vars(args):
-        if arg not in config and (getattr(args, arg) is not None):
+        if (arg in config and (getattr(args, arg) is not None)) or (arg not in config):
             config[arg] = getattr(args, arg)
 
     train_dataset = SparseDataset(
@@ -105,12 +105,17 @@ if __name__ == "__main__":
         model.parameters(), lr=config["lr"], weight_decay=config["weight_decay"]
     )
     trainer = SingleTrainer(
-        model, config, criterion, optimizer, debug=config["is_debug"], device=device
+        model,
+        config,
+        learn_kernel=config["learn_kernel"],
+        criterion=criterion,
+        optimizer=optimizer,
+        debug=config["is_debug"],
+        device=device,
     )
 
     trainer.train(
         train_loader,
         n_epochs=config["n_epochs"],
-        learn_kernel=config["learn_kernel"],
         validation_loader=validation_loader,
     )
