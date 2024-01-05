@@ -117,7 +117,7 @@ def create_signal(h, molecule, m1, s1, Range):
     x_degraded_2000 = np.convolve(x_true, h, mode="same")
     p = np.shape(x_degraded)
     # Varaible noise
-    s = np.random.uniform(0.0 + e, s1)
+    s = np.random.uniform(0.2 + e, s1)
     s1 = s
     noise = np.random.normal(m1, s1, p)
     x_degraded = x_degraded + noise

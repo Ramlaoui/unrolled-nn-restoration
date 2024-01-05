@@ -18,14 +18,18 @@ def generate_kernel_h(length=50, type="random"):
     """
     length += 1
     if type == "gaussian":
-        h = 1 / (np.sqrt(2 * np.pi)) * np.exp(-((np.linspace(-5, 5, length)) ** 2) / 2)
+        h = (
+            1
+            / (np.sqrt(2 * np.pi))
+            * np.exp(-((np.linspace(-20, 20, length)) ** 2) / 2)
+        )
         # h = h / np.sum(h)
     elif type == "gaussian_heteroscedastic":
         scale = np.random.uniform(0.5 + 1e-10, 1.5, length)
         h = (
             1
             / (scale * np.sqrt(2 * np.pi))
-            * np.exp(-((np.linspace(-5, 5, length)) ** 2) / (2 * scale**2))
+            * np.exp(-((np.linspace(-20, 20, length)) ** 2) / (2 * scale**2))
         )
         # h = h / np.sum(h)
     elif type == "deriv":
