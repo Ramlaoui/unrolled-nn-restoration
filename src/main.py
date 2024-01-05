@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     # Fill the config object with the args
     for arg in vars(args):
-        if (arg in config and (getattr(args, arg) is not None)) or (arg not in config):
+        if arg not in config and (getattr(args, arg) is not None):
             config[arg] = getattr(args, arg)
 
     train_dataset = SparseDataset(
@@ -60,10 +60,10 @@ if __name__ == "__main__":
 
     config_test = config.copy()
     config_test["data_path"] = config["data_path"].replace("training", "validation")
-    config_test["batch_size"] = 1
     validation_dataset = SparseDataset(
         config_test, learn_kernel=config["learn_kernel"], data_type="validation"
     )
+    config_test["batch_size"] = len(validation_dataset)
     validation_loader = torch.utils.data.DataLoader(
         validation_dataset, batch_size=config["batch_size"], shuffle=True
     )
