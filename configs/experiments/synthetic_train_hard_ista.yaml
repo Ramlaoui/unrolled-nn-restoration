@@ -1,0 +1,14 @@
+
+train:
+  model_type: ista
+  n_layers: 16
+  lr: 0.0001
+  weight_decay: 0.0001
+  learn_kernel: False
+  data_path: ./data/synthetic_hard
+
+test_hard:
+  data_path: ./data/synthetic_hard
+
+test_easy:
+  data_path: ./data/synthetic_easy
