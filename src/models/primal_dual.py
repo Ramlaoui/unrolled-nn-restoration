@@ -76,7 +76,16 @@ class PrimalDualLayer(nn.Module):
 
 
 class PrimalDual(nn.Module):
-    def __init__(self, n, m, n_layers, learn_kernel=False, init_factor=1, device="cpu"):
+    def __init__(
+        self,
+        n,
+        m,
+        n_layers,
+        learn_kernel=False,
+        init_factor=1,
+        init_kernel="gaussian",
+        device="cpu",
+    ):
         super().__init__()
         self.model_name = "primal_dual"
         self.device = device
@@ -98,20 +107,23 @@ class PrimalDual(nn.Module):
                 bias=False,
                 padding=padding,
             )
-            # Initialize kernel to gaussian
-            self.h.weight.data = (
-                torch.from_numpy(
-                    (1 / 2 * np.pi)
-                    * np.exp(
-                        -np.arange(-(kernel_size - 1) // 2, (kernel_size - 1) // 2 + 1)
-                        ** 2
-                        / 2
+            if init_kernel == "gaussian":
+                # Initialize kernel to gaussian
+                self.h.weight.data = (
+                    torch.from_numpy(
+                        (1 / 2 * np.pi)
+                        * np.exp(
+                            -np.arange(
+                                -(kernel_size - 1) // 2, (kernel_size - 1) // 2 + 1
+                            )
+                            ** 2
+                            / 2
+                        )
                     )
+                    .reshape(1, 1, -1)
+                    .float()
+                    .to(self.device)
                 )
-                .reshape(1, 1, -1)
-                .float()
-                .to(self.device)
-            )
         self.layers = nn.ModuleList(
             [
                 PrimalDualLayer(n, m, device=device, init_factor=init_factor)
