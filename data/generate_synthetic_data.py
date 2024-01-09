@@ -172,7 +172,7 @@ print(sparsity)
 import shutil
 import os
 
-datasetRoot = os.path.join("../data", dataset_name)
+datasetRoot = os.path.join("./data", dataset_name)
 
 try:
     shutil.rmtree(datasetRoot)
