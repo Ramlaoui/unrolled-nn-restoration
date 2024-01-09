@@ -30,7 +30,7 @@ We include a small dataset for testing purposes and in order to run the main not
 
 ## Usage
 
-The main notebook `main.ipynb` shows how to train and test the models rapidly and outline the main idea behind the different objects and functions in the source code.
+The main notebook `1_presentation_notebook.ipynb` shows how to train and test the models rapidly and outline the main idea behind the different objects and functions in the source code.
 
 In order to train a model, choose a config file in `configs/` (for example `primal_dual.yaml`) and run the following command:
 
