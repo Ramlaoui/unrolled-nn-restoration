@@ -36,6 +36,7 @@ parser.add_argument(
 parser.add_argument("--set_size_training", type=int, default=900)
 parser.add_argument("--set_size_validation", type=int, default=100)
 parser.add_argument("--set_size_test", type=int, default=100)
+parser.add_argument("--Fixed", action="store_true")
 args = parser.parse_args()
 
 
@@ -253,7 +254,10 @@ if args.Range == "Range_1":
             Nh = 15
             h = np.linspace(-Nh, Nh)
             # Ricker Kernel
-            sigma = np.random.uniform(0.25 + e, 1)
+            if args.Fixed:
+                sigma = 0.5
+            else:
+                sigma = np.random.uniform(0.25 + e, 1)
             h = (
                 2
                 / (np.sqrt(3 * sigma) * (np.pi) ** 0.25)
