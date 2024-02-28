@@ -17,8 +17,8 @@ def MM(
     L,
     delta_s_cvx,
     delta_s_ncvx,
-    lamda_cvx,
-    lamda_ncvx,
+    lambda_cvx,
+    lambda_ncvx,
     penalization_number_cvx,
     penalization_number_ncvx,
     mode,
@@ -34,8 +34,8 @@ def MM(
         )
         A = torch.inverse(
             torch.bmm(torch.transpose(H, 1, 2), H)
-            + torch.mul(Diag_cvx, lamda_cvx.unsqueeze(1))
-            + torch.mul(Diag_ncvx, lamda_ncvx.unsqueeze(1))
+            + torch.mul(Diag_cvx, lambda_cvx.unsqueeze(1))
+            + torch.mul(Diag_ncvx, lambda_ncvx.unsqueeze(1))
         )
     return A
 
@@ -60,15 +60,15 @@ class Iter(torch.nn.Module):
         penalization_number_cvx,
         penalization_number_ncvx,
         Disp_param,
-        lamda_cvx=None,
-        lamda_ncvx=None,
+        lambda_cvx=None,
+        lambda_ncvx=None,
     ):
 
         penal_name_cvx = "hq.phi_s" + str(penalization_number_cvx)
         penal_name_ncvx = "hq.phi_s" + str(penalization_number_ncvx)
 
         if self.mode == "learning_lambda_MM":
-            gamma, lamda_cvx, lamda_ncvx = self.architecture(H, x, z)
+            gamma, lambda_cvx, lambda_ncvx = self.architecture(H, x, z)
 
             first_branch = (
                 torch.bmm(torch.bmm(torch.transpose(H, 1, 2), H), x.unsqueeze(dim=2))
@@ -82,20 +82,20 @@ class Iter(torch.nn.Module):
                 "lambda_Arch1",
                 "lambda_Arch1_cvx",
                 "lambda_Arch1_ncvx",
-                "lamda_Arch1_overparam",
-                "lamda_Arch1_cvx_overparam",
-                "lamda_Arch1_ncvx_overparam",
+                "lambda_Arch1_overparam",
+                "lambda_Arch1_cvx_overparam",
+                "lambda_Arch1_ncvx_overparam",
             ]:
                 summ = (
-                    lamda_cvx * second_branch
+                    lambda_cvx * second_branch
                     + first_branch
-                    + lamda_ncvx * second_branch1
+                    + lambda_ncvx * second_branch1
                 )
             else:
                 summ = (
-                    lamda_cvx.unsqueeze(dim=2) * second_branch
+                    lambda_cvx.unsqueeze(dim=2) * second_branch
                     + first_branch
-                    + lamda_ncvx.unsqueeze(dim=2) * second_branch1
+                    + lambda_ncvx.unsqueeze(dim=2) * second_branch1
                 )
 
             inv_A = MM(
@@ -104,8 +104,8 @@ class Iter(torch.nn.Module):
                 L,
                 delta_s_cvx,
                 delta_s_ncvx,
-                lamda_cvx,
-                lamda_ncvx,
+                lambda_cvx,
+                lambda_ncvx,
                 penalization_number_cvx,
                 penalization_number_ncvx,
                 self.mode,
@@ -122,7 +122,7 @@ class Iter(torch.nn.Module):
             second_branch = eval(penal_name_cvx + "(x.unsqueeze(dim=2),delta_s_cvx)")
             second_branch1 = eval(penal_name_ncvx + "(x.unsqueeze(dim=2),delta_s_ncvx)")
             summ = (
-                lamda_cvx * second_branch + first_branch + lamda_ncvx * second_branch1
+                lambda_cvx * second_branch + first_branch + lambda_ncvx * second_branch1
             )
             inv_A = MM(
                 x,
@@ -130,8 +130,8 @@ class Iter(torch.nn.Module):
                 L,
                 delta_s_cvx,
                 delta_s_ncvx,
-                lamda_cvx,
-                lamda_ncvx,
+                lambda_cvx,
+                lambda_ncvx,
                 penalization_number_cvx,
                 penalization_number_ncvx,
                 self.mode,
@@ -139,7 +139,7 @@ class Iter(torch.nn.Module):
             x = (x.unsqueeze(dim=2) - torch.bmm(inv_A, summ)).squeeze(dim=2)
 
         if Disp_param == True:
-            return x, lamda_cvx, lamda_ncvx, gamma
+            return x, lambda_cvx, lambda_ncvx, gamma
 
         if Disp_param == False:
             return x
@@ -164,8 +164,8 @@ class Block(torch.nn.Module):
         penalization_num,
         penalization_num1,
         Disp_param,
-        lamda_cvx=None,
-        lamda_ncvx=None,
+        lambda_cvx=None,
+        lambda_ncvx=None,
     ):
 
         return self.Iter(
@@ -179,8 +179,8 @@ class Block(torch.nn.Module):
             penalization_num,
             penalization_num1,
             Disp_param,
-            lamda_cvx,
-            lamda_ncvx,
+            lambda_cvx,
+            lambda_ncvx,
         )
 
 
@@ -303,7 +303,7 @@ class HalfQuadratic(torch.nn.Module):
                     gammas.append(gamma)
 
             if mode == "Deep_equilibrium":
-                lamda_cvx, lamda_ncvx = self.architecture(H, x, z)
+                lambda_cvx, lambda_ncvx = self.architecture(H, x, z)
                 x = self.Layers[i](
                     x,
                     z,
@@ -315,8 +315,8 @@ class HalfQuadratic(torch.nn.Module):
                     self.number_penalization_cvx,
                     self.number_penalization_ncvx,
                     Disp_param,
-                    lamda_cvx,
-                    lamda_ncvx,
+                    lambda_cvx,
+                    lambda_ncvx,
                 )
 
         if Disp_param == False:
