@@ -8,6 +8,7 @@ from src.models.hq import HalfQuadratic
 from pathlib import Path
 import yaml
 import argparse
+import datetime
 
 
 if __name__ == "__main__":
@@ -127,6 +128,7 @@ if __name__ == "__main__":
         model.parameters(), lr=config["lr"]
     )
 
+    run_name_prefix = f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{args.model_type}_"
     run_name_ext = f"_{args.run_name_ext}" if args.run_name_ext is not None else ""
 
     trainer = SingleTrainer(
@@ -138,7 +140,7 @@ if __name__ == "__main__":
         optimizer=optimizer,
         debug=config["is_debug"],
         model_path=args.model_path,
-        run_name=str(args.config).split("/")[-1].split(".")[0] + run_name_ext,
+        run_name=run_name_prefix + str(args.config).split("/")[-1].split(".")[0] + run_name_ext,
         device=device,
     )
 
