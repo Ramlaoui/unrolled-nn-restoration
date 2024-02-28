@@ -19,6 +19,7 @@ if __name__ == "__main__":
     parser.add_argument("--init_factor", type=float, default=1)
 
     # For these arguments only use them if they are inputted:
+    parser.add_argument("--run_name_ext", type=str)
     parser.add_argument("--model_type", type=str)
     parser.add_argument("--n_epochs", type=int)
     parser.add_argument("--batch_size", type=int)
@@ -26,6 +27,7 @@ if __name__ == "__main__":
     parser.add_argument("--lr", type=float)
     parser.add_argument("--data_path", type=str)
     parser.add_argument("--learn_kernel", type=bool)
+    parser.add_argument("--init_kernel", type=str)
     parser.add_argument("--test", action="store_true")
 
     args = parser.parse_args()
@@ -125,6 +127,8 @@ if __name__ == "__main__":
         model.parameters(), lr=config["lr"]
     )
 
+    run_name_ext = f"_{args.run_name_ext}" if args.run_name_ext is not None else ""
+
     trainer = SingleTrainer(
         model,
         config,
@@ -134,7 +138,7 @@ if __name__ == "__main__":
         optimizer=optimizer,
         debug=config["is_debug"],
         model_path=args.model_path,
-        run_name=str(args.config).split("/")[-1].split(".")[0],
+        run_name=str(args.config).split("/")[-1].split(".")[0] + run_name_ext,
         device=device,
     )
 
