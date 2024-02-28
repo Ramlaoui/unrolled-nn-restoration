@@ -106,12 +106,12 @@ if __name__ == "__main__":
             m_signal,
             config["n_layers"],
             L,
-            delta_s_cvx=0.1,
-            delta_s_ncvx=1,
-            mode="learning_lambda_MM",
-            number_penalization_cvx="fair",
-            number_penalization_ncvx="cauchy",
-            architecture_lambda="lamda_Arch2_overparam", #lamda bruhhh
+            delta_s_cvx=config["model"].get("delta_s_cvx", 0.1),
+            delta_s_ncvx=config["model"].get("delta_s_ncvx", 1),
+            mode=config["model"].get("mode", "learning_lambda_MM"),
+            number_penalization_cvx=config["model"].get("number_penalization_cvx", "fair"),
+            number_penalization_ncvx=config["model"].get("number_penalization_ncvx", "cauchy"),
+            architecture_lambda=config["model"].get("architecture_lambda", "lamda_Arch2_overparam"), #lamda bruhhh
             learn_kernel=config["learn_kernel"],
             init_kernel=init_kernel,
             device=device,
