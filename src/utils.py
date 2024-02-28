@@ -30,3 +30,27 @@ def snr(x, x_pred):
 
 def mae(x, x_pred):
     return torch.mean(torch.abs(x - x_pred))
+
+def mse(x, x_pred):
+    return torch.mean((x - x_pred) ** 2)
+
+def convmtx_torch(h, n_in, device="cpu"):
+    """
+    Generates a convolution matrix H
+    such that the product of H and an i_n element vector
+    x is the convolution of x and h.
+
+    Usage: H = convm(h,n_in)
+    Given a column vector h of length N, an (N+n_in-1 x n_in)_in convolution matrix is
+    generated
+
+    This method has the same functionning as that of np.convolve(x,h)
+    """
+    N = len(h)
+    N1 = N + 2 * n_in - 2
+    hpad = torch.concatenate([torch.zeros(n_in - 1, device=device), h[:], torch.zeros(n_in - 1, device=device)])
+
+    H = torch.zeros((len(h) + n_in - 1, n_in), device=device)
+    for i in range(n_in):
+        H[:, i] = hpad[n_in - i - 1 : N1 - i]
+    return H

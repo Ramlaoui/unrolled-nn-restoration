@@ -5,8 +5,7 @@ from torch import nn
 import wandb
 import matplotlib.pyplot as plt
 from pathlib import Path
-from src.utils import snr, mae, mse
-from data.generate_synthetic_data import convmtx
+from src.utils import snr, mae, mse, convmtx_torch
 
 
 class SparseDataset(torch.utils.data.Dataset):
@@ -20,16 +19,16 @@ class SparseDataset(torch.utils.data.Dataset):
         self.x_path = self.path / "Groundtruth"
 
         self.learn_kernel = learn_kernel
-        if self.learn_kernel:
-            self.load_kernel = load_kernel
-            self.H_path = self.path / "H.npy"
+        self.load_kernel = load_kernel
+        if self.load_kernel:
+            self.H_path = Path(config["data_path"]) / "H.npy"
             self.H = np.load(self.H_path)
-        if not (learn_kernel):
+        elif not (self.learn_kernel):
             self.H_path = self.path / "H"
 
         self.z_files = sorted(list(self.z_path.glob("*.npy")))
         self.x_files = sorted(list(self.x_path.glob("*.npy")))
-        if not (self.learn_kernel):
+        if not (self.learn_kernel) and not (self.load_kernel):
             self.H_files = sorted(list(self.H_path.glob("*.npy")))
 
     def __len__(self):
@@ -38,7 +37,7 @@ class SparseDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         z = np.load(self.z_files[idx])
         x = np.load(self.x_files[idx])
-        if not (self.learn_kernel):
+        if not (self.learn_kernel) and not (self.load_kernel):
             H = np.load(self.H_files[idx])
         elif self.load_kernel:
             H = self.H
@@ -70,6 +69,8 @@ class SingleTrainer:
         self.learn_kernel = learn_kernel
         self.load_kernel = load_kernel
         self.run_name = run_name
+        if not (self.model_path.exists()):
+            self.model_path.mkdir()
         if criterion is None:
             criterion = nn.MSELoss()
         self.criterion = criterion
@@ -118,6 +119,11 @@ class SingleTrainer:
                 batch_mae = mae(x_batch, x_pred)
                 batch_loss.backward()
                 self.optimizer.step()
+                if self.learn_kernel and self.load_kernel:
+                    mse_h = mse(
+                        convmtx_torch(self.model.h.weight.detach().reshape(-1), x_batch.shape[1]),
+                        H_true[0],
+                    )
                 if not (self.debug):
                     self.logger.log({"loss": batch_loss.item()})
                     self.logger.log({"snr": barch_snr.item()})
@@ -126,10 +132,7 @@ class SingleTrainer:
                     if self.learn_kernel and self.load_kernel:
                         self.logger.log(
                             {
-                                "delta_h": mse(
-                                    self.model.h.weight.detach().cpu().numpy(),
-                                    convmtx(H_true, x_batch.shape[1]),
-                                )
+                                "mse_h": mse_h,
                             }
                         )
 
@@ -151,6 +154,10 @@ class SingleTrainer:
                     x_val, H_val = x_H_val
                     x_val = x_val.to(self.device)
                     H_val = H_val.to(self.device)
+                elif self.load_kernel:
+                    x_val, H_true = x_H_val
+                    x_val = x_val.to(self.device)
+                    H_val = None
                 else:
                     x_val = x_H_val.to(self.device)
                     H_val = None

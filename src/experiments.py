@@ -51,7 +51,7 @@ if __name__ == "__main__":
             config[arg] = getattr(args, arg)
 
     train_dataset = SparseDataset(
-        config, learn_kernel=config["learn_kernel"], data_type="training"
+        config, learn_kernel=config["learn_kernel"], load_kernel=config["load_kernel"], data_type="training"
     )
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=config["batch_size"], shuffle=True
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     config_val = config.copy()
 
     validation_dataset = SparseDataset(
-        config_val, learn_kernel=config["learn_kernel"], data_type="validation"
+        config_val, learn_kernel=config["learn_kernel"], load_kernel=config["load_kernel"], data_type="validation"
     )
 
     config_val["data_path"] = config["data_path"].replace("training", "validation")
@@ -69,10 +69,10 @@ if __name__ == "__main__":
         validation_dataset, batch_size=config["batch_size"], shuffle=False
     )
 
-    if config["learn_kernel"]:
-        n_signal = train_dataset[0][1].shape[0]
-    else:
+    if not(config["learn_kernel"]) or config["load_kernel"]:
         n_signal = train_dataset[0][1][0].shape[0]
+    else:
+        n_signal = train_dataset[0][1].shape[0]
     m_signal = train_dataset[0][0].shape[0]
     device = torch.device(config["device"])
 
@@ -110,6 +110,7 @@ if __name__ == "__main__":
         model,
         config,
         learn_kernel=config["learn_kernel"],
+        load_kernel=config["load_kernel"],
         criterion=criterion,
         optimizer=optimizer,
         debug=config["is_debug"],
