@@ -1,0 +1,19 @@
+train:
+  model_type: half_quadratic
+  model:
+    delta_s_cvx: 0.1
+    delta_s_ncvx: 1
+    mode: learning_lambda_MM
+    number_penalization_cvx: fair
+    number_penalization_ncvx: cauchy
+    architecture_lambda: lambda_Arch2_overparam
+  n_layers: 8
+  lr: 0.01
+  weight_decay: 0.0001
+  learn_kernel: True
+  load_kernel: True
+  init_kernel: default
+  data_path: ./data/Dataset1
+
+test_massbank_fixed:
+  data_path: ./data/Dataset1
