@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from src.train import SparseDataset, SingleTrainer
 from src.models.primal_dual import PrimalDual
 from src.models.ista import ISTA
+from src.models.hq import HalfQuadratic
 from pathlib import Path
 import yaml
 import argparse
@@ -98,12 +99,30 @@ if __name__ == "__main__":
             device=device,
             init_kernel=init_kernel,
         )
+    elif args.model_type == "half_quadratic":
+        L = torch.eye(n_signal).type(torch.FloatTensor).to(device)
+        model = HalfQuadratic(
+            n_signal,
+            m_signal,
+            config["n_layers"],
+            L,
+            delta_s_cvx=0.1,
+            delta_s_ncvx=1,
+            mode="learning_lambda_MM",
+            number_penalization_cvx="fair",
+            number_penalization_ncvx="cauchy",
+            architecture_lambda="lamda_Arch2_overparam", #lamda bruhhh
+            learn_kernel=config["learn_kernel"],
+            init_kernel=init_kernel,
+            device=device,
+            Disp_param=False,
+        )
 
     model.to(device)
     criterion = torch.nn.MSELoss()
 
     optimizer = torch.optim.Adam(
-        model.parameters(), lr=config["lr"], weight_decay=config["weight_decay"]
+        model.parameters(), lr=config["lr"]
     )
 
     trainer = SingleTrainer(

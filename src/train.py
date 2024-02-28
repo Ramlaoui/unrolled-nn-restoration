@@ -98,6 +98,8 @@ class SingleTrainer:
         if self.model.device != self.device:
             self.device = self.model.device
         for epoch in tqdm(range(n_epochs)):
+            if self.device == "cuda":
+                torch.cuda.empty_cache()
             epoch_loss = 0
             for z_batch, x_H in train_loader:
                 z_batch = z_batch.to(self.device)
@@ -121,13 +123,14 @@ class SingleTrainer:
                 self.optimizer.step()
                 if self.learn_kernel and self.load_kernel:
                     mse_h = mse(
-                        convmtx_torch(self.model.h.weight.detach().reshape(-1), x_batch.shape[1]),
+                        convmtx_torch(self.model.h.weight.detach().reshape(-1), x_batch.shape[1], device=self.device),
                         H_true[0],
                     )
                 if not (self.debug):
                     self.logger.log({"loss": batch_loss.item()})
                     self.logger.log({"snr": barch_snr.item()})
                     self.logger.log({"mae": batch_mae.item()})
+                    self.logger.log({"learning_rate": self.optimizer.param_groups[0]["lr"]})
 
                     if self.learn_kernel and self.load_kernel:
                         self.logger.log(
