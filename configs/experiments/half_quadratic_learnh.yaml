@@ -9,7 +9,6 @@ train:
     architecture_lambda: lambda_Arch2_overparam
   n_layers: 8
   lr: 0.01
-  weight_decay: 0.0001
   learn_kernel: True
   load_kernel: True
   init_kernel: default

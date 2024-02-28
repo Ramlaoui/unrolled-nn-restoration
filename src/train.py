@@ -121,10 +121,12 @@ class SingleTrainer:
                 batch_mae = mae(x_batch, x_pred)
                 batch_loss.backward()
                 self.optimizer.step()
+                # if self.load_kernel:
+                #     self.logger.log({"true_H": reverse_convmxt_torch(H_true[0].detach(), x_batch.shape[1], device=self.device).cpu().numpy()})
                 if self.learn_kernel and self.load_kernel:
                     mse_h = mse(
                         convmtx_torch(self.model.h.weight.detach().reshape(-1), x_batch.shape[1], device=self.device),
-                        H_true[0],
+                        H_true[0].to(self.device),
                     )
                 if not (self.debug):
                     self.logger.log({"loss": batch_loss.item()})
@@ -221,6 +223,10 @@ class SingleTrainer:
                 x_batch, H_batch = x_H
                 x_batch = x_batch.to(self.device)
                 H_batch = H_batch.to(self.device)
+            elif self.load_kernel:
+                x_batch, H_true = x_H
+                x_batch = x_batch.to(self.device)
+                H_batch = None
             else:
                 x_batch = x_H.to(self.device)
                 H_batch = None
@@ -230,11 +236,24 @@ class SingleTrainer:
                 test_loss += batch_loss.item()
                 test_snr = snr(x_batch, x_pred)
                 test_mae = mae(x_batch, x_pred)
+                if self.learn_kernel and self.load_kernel:
+                    mse_h = mse(
+                        convmtx_torch(self.model.h.weight.detach().reshape(-1), x_batch.shape[1], device=self.device),
+                        H_true[0].to(self.device),
+                    )
         print(name)
         print(f"Test loss: {test_loss/test_loader.__len__()}")
         print(f"Test SNR: {test_snr.item()}")
         print(f"Test MAE: {test_mae.item()}")
+        if self.learn_kernel and self.load_kernel:
+            print(f"MSE H: {mse_h}")
         if not (self.debug):
             self.logger.log({f"test_loss{name}": test_loss / test_loader.__len__()})
             self.logger.log({f"test_snr{name}": test_snr.item()})
             self.logger.log({f"test_mae{name}": test_mae.item()})
+            if self.learn_kernel and self.load_kernel:
+                self.logger.log(
+                    {
+                        f"mse_h{name}": mse_h,
+                    }
+                )
