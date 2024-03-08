@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import torch
 from tqdm import tqdm
@@ -23,6 +24,8 @@ class SparseDataset(torch.utils.data.Dataset):
         if self.load_kernel:
             self.H_path = Path(config["data_path"]) / "H.npy"
             self.H = np.load(self.H_path)
+            kernel_size = self.H.shape[0] - self.H.shape[1] + 1
+            self.h = self.H[:kernel_size, 0]
         elif not (self.learn_kernel):
             self.H_path = self.path / "H"
 
@@ -58,17 +61,23 @@ class SingleTrainer:
         load_kernel=False,
         criterion=None,
         optimizer=None,
+        scheduler=None,
         model_path="models/",
+        log_path="logs/",
         run_name=None,
+        clip_grad=True,
         device=None,
         debug=False,
     ):
         self.model = model
         self.model_name = model.__class__.__name__
         self.model_path = Path(model_path)
+        self.log_path = Path(log_path) / run_name
+        os.makedirs(self.log_path, exist_ok=True)
         self.learn_kernel = learn_kernel
         self.load_kernel = load_kernel
         self.run_name = run_name
+        self.clip_grad = clip_grad
         if not (self.model_path.exists()):
             self.model_path.mkdir()
         if criterion is None:
@@ -79,6 +88,7 @@ class SingleTrainer:
                 self.model.parameters(), lr=config["learning_rate"], weight_decay=1e-5
             )
         self.optimizer = optimizer
+        self.scheduler = scheduler
         if device is None:
             device = torch.device("cpu")
         self.device = device
@@ -117,12 +127,14 @@ class SingleTrainer:
                 self.optimizer.zero_grad()
                 x_pred = self.model(z_batch, H_batch)
                 batch_loss = self.criterion(x_pred, x_batch)
-                barch_snr = snr(x_batch, x_pred)
+                batch_snr = snr(x_batch, x_pred)
                 batch_mae = mae(x_batch, x_pred)
+                # if torch.isnan(batch_loss).any() or torch.isinf(batch_loss).any() or torch.isnan(x_pred).any():
+                #     breakpoint()
                 batch_loss.backward()
+                if self.clip_grad:
+                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
                 self.optimizer.step()
-                # if self.load_kernel:
-                #     self.logger.log({"true_H": reverse_convmxt_torch(H_true[0].detach(), x_batch.shape[1], device=self.device).cpu().numpy()})
                 if self.learn_kernel and self.load_kernel:
                     mse_h = mse(
                         convmtx_torch(self.model.h.weight.detach().reshape(-1), x_batch.shape[1], device=self.device),
@@ -130,7 +142,7 @@ class SingleTrainer:
                     )
                 if not (self.debug):
                     self.logger.log({"loss": batch_loss.item()})
-                    self.logger.log({"snr": barch_snr.item()})
+                    self.logger.log({"snr": batch_snr.item()})
                     self.logger.log({"mae": batch_mae.item()})
                     self.logger.log({"learning_rate": self.optimizer.param_groups[0]["lr"]})
 
@@ -138,6 +150,8 @@ class SingleTrainer:
                         self.logger.log(
                             {
                                 "mse_h": mse_h,
+                                "h_original": train_loader.dataset.h,
+                                "delta_h": np.abs(self.model.h.weight.detach().cpu().numpy().reshape(-1) - train_loader.dataset.h),
                             }
                         )
 
@@ -149,6 +163,18 @@ class SingleTrainer:
                         }
                     )
                 epoch_loss += batch_loss.item()
+                self.scheduler.step()
+            if not (self.debug) and (self.learn_kernel and self.load_kernel):
+                plt.figure()
+                plt.plot(self.model.h.weight.detach().cpu().numpy().reshape(-1), label="Learned kernel")
+                plt.plot(train_loader.dataset.h, label="Original kernel")
+                plt.title(f"Learned kernel for epoch {epoch}\nRun {self.run_name}\nSNR: {batch_snr.item()}")
+                plt.legend()
+                plt.savefig(
+                    self.log_path
+                    / f"learned_kernel_{self.run_name}_{epoch}.png"
+                )
+
             print(f"Epoch {epoch} loss: {epoch_loss/train_loader.__len__()}")
             if validation_loader is not None:
                 print("Calculating validation loss...")
@@ -176,6 +202,7 @@ class SingleTrainer:
                             x_pred_plot = x_pred_val.detach().cpu().numpy()[p]
                             x_val_plot = x_val.detach().cpu().numpy()[p]
                             z_batch_plot = z_val.detach().cpu().numpy()[p]
+                            plt.figure(figsize=(25, 10))
                             plt.plot(x_pred_plot, label="Restored signal")
                             plt.plot(x_val_plot, label="Original signal")
                             plt.plot(
@@ -184,6 +211,10 @@ class SingleTrainer:
                                 + str(validation_loader.dataset.z_files[p]),
                             )
                             plt.legend()
+                            plt.savefig(
+                                self.log_path
+                                / f"restored_signal_{self.run_name}_{epoch}.png"
+                            )
                             self.logger.log(
                                 {"val_loss": val_loss.item(), "prediction_example": plt}
                             )
