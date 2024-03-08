@@ -244,7 +244,6 @@ class HalfQuadratic(torch.nn.Module):
                 )
             else:
                 # set the highest value to 1 in the middle to get a correct shape
-                breakpoint()
                 self.h.weight.data[:, :, kernel_size // 2] = 1
 
         for i in range(n_layers):
