@@ -1,0 +1,11 @@
+train:
+  model_type: primal_dual
+  n_layers: 22
+  lr: 0.01
+  learn_kernel: True
+  load_kernel: True
+  init_kernel: default
+  data_path: ./data/Dataset1
+
+test_massbank_fixed:
+  data_path: ./data/Dataset1

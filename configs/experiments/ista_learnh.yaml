@@ -1,0 +1,14 @@
+train:
+  model_type: ista
+  n_layers: 16
+  lr_scheduler: CosineAnnealingLR
+  lr_scheduler_T_max: 10
+  lr_scheduler_eta_min: 0.0005
+  lr: 0.001
+  learn_kernel: True
+  load_kernel: True
+  init_kernel: default
+  data_path: ./data/Dataset1
+
+test_massbank_fixed:
+  data_path: ./data/Dataset1

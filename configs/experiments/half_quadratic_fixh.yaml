@@ -11,11 +11,11 @@ train:
   lr_scheduler: CosineAnnealingLR
   lr_scheduler_T_max: 0.1
   lr_scheduler_step_size: 1
-  lr_scheduler_eta_min: 0.001
-  lr: 0.007
-  learn_kernel: True
+  lr_scheduler_eta_min: 0.0001
+  lr: 0.0005
+  learn_kernel: False
   load_kernel: True
-  init_kernel: gaussian
+  init_kernel: default
   data_path: ./data/Dataset1
 
 test_massbank_fixed:
