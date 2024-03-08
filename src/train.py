@@ -73,7 +73,6 @@ class SingleTrainer:
         self.model_name = model.__class__.__name__
         self.model_path = Path(model_path)
         self.log_path = Path(log_path) / run_name
-        os.makedirs(self.log_path, exist_ok=True)
         self.learn_kernel = learn_kernel
         self.load_kernel = load_kernel
         self.run_name = run_name
@@ -93,6 +92,8 @@ class SingleTrainer:
             device = torch.device("cpu")
         self.device = device
         self.debug = debug
+        if not (debug):
+            os.makedirs(self.log_path, exist_ok=True)
         if not (debug):
             self.logger = wandb
             self.logger.init(project="deep-unrolling", config=config, name=run_name)
@@ -170,9 +171,9 @@ class SingleTrainer:
                 plt.plot(train_loader.dataset.h, label="Original kernel")
                 plt.title(f"Learned kernel for epoch {epoch}\nRun {self.run_name}\nSNR: {batch_snr.item()}")
                 plt.legend()
+                os.makedirs(self.log_path / f"{epoch}", exist_ok=True)
                 plt.savefig(
-                    self.log_path
-                    / f"learned_kernel_{self.run_name}_{epoch}.png"
+                    self.log_path / f"{epoch}" / f"learned_kernel_{self.run_name}_{epoch}.png"
                 )
 
             print(f"Epoch {epoch} loss: {epoch_loss/train_loader.__len__()}")
@@ -211,8 +212,9 @@ class SingleTrainer:
                                 + str(validation_loader.dataset.z_files[p]),
                             )
                             plt.legend()
+                            os.makedirs(self.log_path / f"{epoch}", exist_ok=True)
                             plt.savefig(
-                                self.log_path
+                                self.log_path / f"{epoch}"
                                 / f"restored_signal_{self.run_name}_{epoch}.png"
                             )
                             self.logger.log(
