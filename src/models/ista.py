@@ -3,8 +3,8 @@ import torch.nn as nn
 import numpy as np
 from src.utils import prox_primal
 
-chi = 4
-gamma = 0.2
+CHI = 4
+GAMMA = 0.2
 
 
 class ISTALayer(nn.Module):
@@ -22,11 +22,11 @@ class ISTALayer(nn.Module):
         self.device = device
         self.relu = nn.ReLU()
         self.chi = nn.Parameter(
-            torch.FloatTensor([chi * init_factor]).to(self.device),
+            torch.FloatTensor([CHI * init_factor]).to(self.device),
             requires_grad=True,
         )
         self.gamma = nn.Parameter(
-            torch.FloatTensor([gamma * init_factor]).to(self.device), requires_grad=True
+            torch.FloatTensor([GAMMA * init_factor]).to(self.device), requires_grad=True
         )
 
     def forward(self, x, z, H):
@@ -123,7 +123,8 @@ class ISTA(nn.Module):
     def forward(self, z, H=None):
         if H is None:
             H = self.h
-        x = torch.randn(z.shape[0], self.n, requires_grad=False, device=self.device)
+        # x = torch.randn(z.shape[0], self.n, requires_grad=False, device=self.device)
+        x = torch.zeros(z.shape[0], self.n, requires_grad=False, device=self.device)
         for layer in self.layers:
             x = layer(x, z, H)
         return x

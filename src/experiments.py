@@ -128,6 +128,25 @@ if __name__ == "__main__":
         model.parameters(), lr=config["lr"]
     )
 
+
+    if config.get("lr_scheduler", None) is not None:
+        if config["lr_scheduler"] == "StepLR":
+            scheduler = torch.optim.lr_scheduler.StepLR(
+                optimizer, step_size=(config.get("lr_scheduler_step_size", config["n_epochs"])*len(train_loader)), gamma=config.get("lr_scheduler_gamma", 0.1)
+            )
+        elif config["lr_scheduler"] == "ReduceLROnPlateau":
+            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+                optimizer, mode="min", factor=config.get("lr_scheduler_factor", 0.1), patience=config.get("lr_scheduler_patience", 10), verbose=True
+            )
+        elif config["lr_scheduler"] == "CosineAnnealingLR":
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+                optimizer, T_max=int(config.get("lr_scheduler_T_max", config["n_epochs"])*len(train_loader)), eta_min=config.get("lr_scheduler_eta_min", 0.0001)
+            )
+        else:
+            raise ValueError(f"Unknown lr_scheduler: {config['lr_scheduler']}")
+    else:
+        scheduler = None
+
     run_name_prefix = f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{args.model_type}_"
     run_name_ext = f"_{args.run_name_ext}" if args.run_name_ext is not None else ""
 
@@ -138,6 +157,7 @@ if __name__ == "__main__":
         load_kernel=config["load_kernel"],
         criterion=criterion,
         optimizer=optimizer,
+        scheduler=scheduler,
         debug=config["is_debug"],
         model_path=args.model_path,
         run_name=run_name_prefix + str(args.config).split("/")[-1].split(".")[0] + run_name_ext,
